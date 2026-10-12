@@ -1,0 +1,73 @@
+<a class="skip-link" href="#main">{{ 'web_skip_to_content' | transloco }}</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" routerLink="/" aria-label="Movienee">
+      <span>movie</span><span class="accent">nee</span>
+    </a>
+
+    <nav class="top-nav" [attr.aria-label]="'nav_home' | transloco">
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.exact }"
+          ariaCurrentWhenActive="page"
+          >{{ item.labelKey | transloco }}</a
+        >
+      }
+    </nav>
+
+    <div class="actions">
+      <button
+        class="icon-btn lang"
+        type="button"
+        (click)="language.toggle()"
+        [attr.aria-label]="'web_language_toggle' | transloco"
+        [title]="'web_language_toggle' | transloco"
+      >
+        {{ language.language() === 'sr' ? 'EN' : 'SR' }}
+      </button>
+
+      <button
+        class="icon-btn"
+        type="button"
+        (click)="theme.cycle()"
+        [attr.aria-label]="themeLabelKey() | transloco"
+        [title]="themeLabelKey() | transloco"
+      >
+        <span class="icon" aria-hidden="true">{{ themeIcon() }}</span>
+      </button>
+
+      @if (session.isSignedIn()) {
+        <a class="account" routerLink="/profile" [attr.aria-label]="'nav_profile' | transloco">
+          @if (avatar(); as src) {
+            <img [src]="src" alt="" width="32" height="32" />
+          } @else {
+            <span class="icon" aria-hidden="true">account_circle</span>
+          }
+        </a>
+      } @else {
+        <a class="btn primary sign-in" routerLink="/sign-in">{{ 'profile_sign_in' | transloco }}</a>
+      }
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <router-outlet />
+</main>
+
+<nav class="bottom-nav" [attr.aria-label]="'nav_home' | transloco">
+  @for (item of navItems; track item.path) {
+    <a
+      [routerLink]="item.path"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: item.exact }"
+      ariaCurrentWhenActive="page"
+    >
+      <span class="icon" aria-hidden="true">{{ item.icon }}</span>
+      <span class="label">{{ item.labelKey | transloco }}</span>
+    </a>
+  }
+</nav>

@@ -1,0 +1,11 @@
+{
+  "web_skip_to_content": "Skip to content",
+  "web_theme_dark": "Dark theme",
+  "web_theme_light": "Light theme",
+  "web_theme_system": "System theme",
+  "web_language_toggle": "Change language",
+  "web_not_found_title": "Page not found",
+  "web_not_found_body": "The link may be wrong or the page no longer exists.",
+  "web_back_home": "Back to home",
+  "web_under_construction": "This screen is under construction."
+}

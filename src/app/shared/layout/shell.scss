@@ -1,0 +1,166 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -48px;
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+  &:focus {
+    top: var(--space-2);
+  }
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--topbar-h);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  height: 100%;
+  width: min(var(--content-max), 100% - 2 * var(--space-4));
+  margin-inline: auto;
+}
+
+// The "movie-nee" wordmark (MovieneeWordmark.kt): bold italic, "nee" in brand red.
+.brand {
+  font-size: 1.375rem;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  .accent {
+    color: var(--accent);
+  }
+}
+
+.top-nav {
+  display: flex;
+  gap: var(--space-1);
+  a {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-pill);
+    color: var(--text-2);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    &:hover {
+      color: var(--text);
+      background: var(--surface-1);
+    }
+    &.active {
+      color: var(--text);
+      background: var(--surface-2);
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.lang {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+}
+
+.account {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+  }
+  .icon {
+    font-size: 32px;
+  }
+}
+
+.sign-in {
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  font-size: 0.875rem;
+}
+
+main {
+  outline: none;
+}
+
+.bottom-nav {
+  display: none;
+}
+
+// Narrow screens: navigation moves to a bottom bar (like the Android app).
+@media (max-width: 760px) {
+  .top-nav {
+    display: none;
+  }
+
+  main {
+    padding-bottom: calc(var(--bottombar-h) + env(safe-area-inset-bottom));
+  }
+
+  .bottom-nav {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    height: calc(var(--bottombar-h) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--surface-1);
+    border-top: 1px solid var(--border);
+
+    a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: var(--text-2);
+      font-size: 0.6875rem;
+      font-weight: 500;
+
+      .icon {
+        padding: 2px 16px;
+        border-radius: var(--radius-pill);
+        transition: background-color 0.15s;
+      }
+
+      &.active {
+        color: var(--accent);
+        .icon {
+          background: color-mix(in srgb, var(--accent) 16%, transparent);
+          font-variation-settings:
+            'FILL' 1,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24;
+        }
+      }
+    }
+  }
+}

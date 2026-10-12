@@ -1,0 +1,56 @@
+# Lint, test and build on every push and pull request; deploy main to Firebase Hosting.
+# Deploy needs the repository secret FIREBASE_SERVICE_ACCOUNT_MOVIELENS_90309
+# (created by `npx firebase-tools init hosting:github`).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npx ng lint
+      - run: npx ng test --watch=false
+      - run: npx ng build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/movienee-web/browser
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/movienee-web/browser
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MOVIELENS_90309 }}
+          projectId: movielens-90309
+          channelId: live

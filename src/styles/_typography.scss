@@ -1,0 +1,48 @@
+// Type scale from the Android theme (Type.kt), Inter everywhere.
+
+.t-display {
+  font-size: 2.125rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.t-headline {
+  font-size: 1.5rem;
+  line-height: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.t-title-lg {
+  font-size: 1.25rem;
+  line-height: 1.625rem;
+  font-weight: 600;
+}
+.t-title {
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 600;
+}
+.t-body-lg {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.t-body {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.t-small {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.t-label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+.t-secondary {
+  color: var(--text-2);
+}
+.t-muted {
+  color: var(--text-muted);
+}

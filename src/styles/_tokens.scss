@@ -1,0 +1,73 @@
+// Design tokens, ported from the Android theme (ui/theme/Color.kt, Type.kt, Shape.kt).
+// Dark is the default; the warm light palette applies with [data-theme='light'] or, when the user
+// follows the system, with prefers-color-scheme: light.
+
+@mixin dark-palette {
+  --bg: #0a0a0a;
+  --surface-1: #161616;
+  --surface-2: #222222;
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #f5f5f5;
+  --text-2: #a3a3a3;
+  --text-muted: #6b6b6b;
+  --gold: #f5c518;
+  --success: #3ddc84;
+  --scrim: rgba(10, 10, 10, 0.92);
+  color-scheme: dark;
+}
+
+@mixin light-palette {
+  --bg: #f5efe4;
+  --surface-1: #fffcf6;
+  --surface-2: #eae0ce;
+  --border: rgba(58, 42, 28, 0.15);
+  --text: #2c231a;
+  --text-2: #6b5b47;
+  --text-muted: #9c8b72;
+  --gold: #b88a00;
+  --success: #1f8a4c;
+  --scrim: rgba(245, 239, 228, 0.94);
+  color-scheme: light;
+}
+
+:root {
+  // Brand accents are the same in both themes.
+  --accent: #e50914;
+  --accent-pressed: #b20710;
+  --on-accent: #ffffff;
+  --error: #e5484d;
+
+  // Shapes (Shape.kt): small = chip/button, medium = cards, large = dialogs/sheets.
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-poster: 8px;
+  --radius-pill: 999px;
+
+  // Spacing scale.
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --content-max: 1200px;
+  --topbar-h: 64px;
+  --bottombar-h: 64px;
+  --shadow-1: 0 4px 16px rgba(0, 0, 0, 0.25);
+
+  @include dark-palette;
+}
+
+:root[data-theme='light'] {
+  @include light-palette;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    @include light-palette;
+  }
+}
