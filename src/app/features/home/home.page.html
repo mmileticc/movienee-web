@@ -17,6 +17,7 @@
           [posterPath]="movie.poster_path"
           [rating]="rating(movie.vote_average)"
           [caption]="year(movie.release_date)"
+          [priority]="$index < 4"
         />
       }
     </app-poster-row>
@@ -69,6 +70,7 @@
           [posterPath]="movie.poster_path"
           [rating]="rating(movie.vote_average)"
           [caption]="movie.cinemas.join(', ')"
+          [priority]="$index < 4"
         />
       }
     </app-poster-row>
@@ -90,6 +92,7 @@
           [posterPath]="movie.poster_path"
           [rating]="rating(movie.vote_average)"
           [caption]="year(movie.release_date)"
+          [priority]="$index < 3"
         />
       }
     </div>

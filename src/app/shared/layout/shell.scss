@@ -151,7 +151,7 @@ main {
       }
 
       &.active {
-        color: var(--accent);
+        color: var(--accent-text);
         .icon {
           background: color-mix(in srgb, var(--accent) 16%, transparent);
           font-variation-settings:

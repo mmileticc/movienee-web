@@ -4,7 +4,13 @@
       <div class="hero-inner">
         <button class="poster" type="button" (click)="openPoster()" [disabled]="!poster()">
           @if (poster(); as src) {
-            <img [src]="src" [alt]="m.title" />
+            <img
+              [src]="src"
+              [attr.srcset]="posterSrcset()"
+              sizes="(max-width: 760px) 120px, 240px"
+              [alt]="m.title"
+              fetchpriority="high"
+            />
           } @else {
             <span class="icon" aria-hidden="true">movie</span>
           }
@@ -191,16 +197,18 @@
         </section>
       }
 
-      @if (backdrops().length > 0) {
+      @if (stills().length > 0) {
         <app-poster-row
           class="section"
           [heading]="'movie_detail_images_header' | transloco"
           [wide]="true"
         >
-          @for (src of backdrops(); track src; let i = $index) {
+          @for (still of stills(); track still.src; let i = $index) {
             <button class="still" type="button" (click)="openBackdrop(i)">
               <img
-                [src]="src"
+                [src]="still.src"
+                [attr.srcset]="still.srcset"
+                sizes="(max-width: 760px) 240px, 300px"
                 [alt]="'movie_detail_backdrop_content_description' | transloco"
                 loading="lazy"
               />

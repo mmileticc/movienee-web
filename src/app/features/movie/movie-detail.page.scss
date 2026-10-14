@@ -88,7 +88,7 @@
     color: #000;
   }
   &.rt {
-    background: #fa320a;
+    background: #d42a08; // Rotten Tomatoes red, darkened for 4.5:1 with white text
     color: #fff;
   }
 }
@@ -101,7 +101,7 @@
 
   .btn.active {
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
   }
 }
 
@@ -119,7 +119,7 @@
     color: var(--text);
     font-weight: 600;
     &:hover {
-      color: var(--accent);
+      color: var(--accent-text);
     }
   }
 }
@@ -196,7 +196,7 @@
   border: 1px solid var(--border);
 
   .pin {
-    color: var(--accent);
+    color: var(--accent-text);
   }
   .cinema-text {
     display: grid;
@@ -214,7 +214,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--accent);
+  color: var(--accent-text);
   font-weight: 600;
   cursor: pointer;
 }
@@ -269,7 +269,7 @@
     overflow: hidden;
   }
   &:hover .name {
-    color: var(--accent);
+    color: var(--accent-text);
   }
 }
 

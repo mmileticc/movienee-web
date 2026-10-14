@@ -9,8 +9,12 @@
   --border: rgba(255, 255, 255, 0.12);
   --text: #f5f5f5;
   --text-2: #a3a3a3;
-  --text-muted: #6b6b6b;
+  --text-muted: #8a8a8a;
   --gold: #f5c518;
+  // Brand red for text: #e50914 is below 4.5:1 on the dark surfaces, so text uses a lighter red.
+  --accent-text: #ff4545;
+  // On the inverted snackbar (light background in the dark theme).
+  --accent-on-inverse: #c8070f;
   --success: #3ddc84;
   --scrim: rgba(10, 10, 10, 0.92);
   color-scheme: dark;
@@ -23,8 +27,10 @@
   --border: rgba(58, 42, 28, 0.15);
   --text: #2c231a;
   --text-2: #6b5b47;
-  --text-muted: #9c8b72;
-  --gold: #b88a00;
+  --text-muted: #73634c;
+  --gold: #856300;
+  --accent-text: #c8070f;
+  --accent-on-inverse: #ff4545;
   --success: #1f8a4c;
   --scrim: rgba(245, 239, 228, 0.94);
   color-scheme: light;

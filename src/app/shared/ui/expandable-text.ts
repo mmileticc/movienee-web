@@ -47,7 +47,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
       padding: 0;
       border: 0;
       background: none;
-      color: var(--accent);
+      color: var(--accent-text);
       font-weight: 600;
       cursor: pointer;
     }

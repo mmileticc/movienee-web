@@ -46,6 +46,11 @@ export class Shell {
     return path === '/friends' && this.session.isSignedIn() ? this.social.incoming().length : 0;
   }
 
+  /** The language the toggle switches to; also starts its accessible name (it is the visible text). */
+  protected readonly otherLanguage = computed(() =>
+    this.language.language() === 'sr' ? 'EN' : 'SR',
+  );
+
   protected readonly avatar = computed(() => avatarUrl(this.session.user()?.avatarUrl));
 
   protected readonly themeIcon = computed(

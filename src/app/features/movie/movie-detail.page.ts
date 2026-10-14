@@ -20,7 +20,7 @@ import { friendlyError } from '../../core/http/friendly-error';
 import { LanguageService } from '../../core/prefs/language.service';
 import { formatDistance, formatRating } from '../../core/util/format';
 import { GeoPoint, currentPosition } from '../../core/util/geo';
-import { releaseYear, tmdbImage } from '../../core/util/image-url';
+import { releaseYear, tmdbImage, tmdbSrcset } from '../../core/util/image-url';
 import { PageTitle } from '../../core/util/page-title';
 import { LibraryStore, MovieSnapshot } from '../../core/state/library.store';
 import { ExpandableText } from '../../shared/ui/expandable-text';
@@ -101,8 +101,16 @@ export class MovieDetailPage {
     this.movie.error() ? friendlyError(this.movie.error(), 'error_load_movie') : null,
   );
 
-  protected readonly backdrop = computed(() => tmdbImage(this.current()?.backdrop_path, 'w1280'));
-  protected readonly poster = computed(() => tmdbImage(this.current()?.poster_path, 'w500'));
+  private readonly narrowScreen =
+    typeof matchMedia === 'function' && matchMedia('(max-width: 760px)').matches;
+  /** A CSS background cannot use srcset, so phones get the smaller file up front. */
+  protected readonly backdrop = computed(() =>
+    tmdbImage(this.current()?.backdrop_path, this.narrowScreen ? 'w780' : 'w1280'),
+  );
+  protected readonly poster = computed(() => tmdbImage(this.current()?.poster_path, 'w342'));
+  protected readonly posterSrcset = computed(() =>
+    tmdbSrcset(this.current()?.poster_path, ['w185', 'w342', 'w500']),
+  );
   protected readonly year = computed(() => releaseYear(this.current()?.release_date));
   protected readonly rating = computed(() =>
     formatRating(this.current()?.vote_average, this.language.language()),
@@ -117,8 +125,11 @@ export class MovieDetailPage {
   protected readonly hiddenCinemaCount = computed(
     () => (this.current()?.showtimes.length ?? 0) - VISIBLE_CINEMAS,
   );
-  protected readonly backdrops = computed(() =>
-    (this.current()?.backdrops ?? []).map((path) => tmdbImage(path, 'w780') ?? ''),
+  protected readonly stills = computed(() =>
+    (this.current()?.backdrops ?? []).map((path) => ({
+      src: tmdbImage(path, 'w300') ?? '',
+      srcset: tmdbSrcset(path, ['w300', 'w780']),
+    })),
   );
 
   protected readonly inWatchlist = computed(() => {

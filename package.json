@@ -7,9 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint",
+    "lint": "ng lint && node tools/check-icons.mjs",
     "test:ci": "ng test --watch=false",
-    "i18n:sync": "node tools/convert-android-strings.mjs ../MovieLens/app/src/main/res public/i18n"
+    "i18n:sync": "node tools/convert-android-strings.mjs ../MovieLens/app/src/main/res public/i18n",
+    "check:icons": "node tools/check-icons.mjs"
   },
   "private": true,
   "packageManager": "npm@11.19.0",

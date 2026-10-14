@@ -27,10 +27,10 @@
         class="icon-btn lang"
         type="button"
         (click)="language.toggle()"
-        [attr.aria-label]="'web_language_toggle' | transloco"
+        [attr.aria-label]="otherLanguage() + ' - ' + ('web_language_toggle' | transloco)"
         [title]="'web_language_toggle' | transloco"
       >
-        {{ language.language() === 'sr' ? 'EN' : 'SR' }}
+        {{ otherLanguage() }}
       </button>
 
       <button

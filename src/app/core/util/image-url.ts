@@ -1,7 +1,16 @@
 import { environment } from '../../../environments/environment';
 
 /** TMDB image sizes used by the app (poster widths and backdrop widths). */
-export type TmdbImageSize = 'w92' | 'w185' | 'w342' | 'w500' | 'w780' | 'w1280' | 'original';
+export type TmdbImageSize =
+  'w92' | 'w185' | 'w300' | 'w342' | 'w500' | 'w780' | 'w1280' | 'original';
+
+/** `srcset` from TMDB widths, e.g. `w185 185w, w342 342w`; null when there is no path. */
+export function tmdbSrcset(
+  path: string | null | undefined,
+  sizes: Exclude<TmdbImageSize, 'original'>[],
+): string | null {
+  return path ? sizes.map((size) => `${tmdbImage(path, size)} ${size.slice(1)}w`).join(', ') : null;
+}
 
 /** Full TMDB image URL for a poster/backdrop/profile path, or null when there is no path. */
 export function tmdbImage(

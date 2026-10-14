@@ -81,7 +81,7 @@ export class SnackbarService {
       button {
         border: 0;
         background: none;
-        color: var(--accent);
+        color: var(--accent-on-inverse);
         font-weight: 700;
         cursor: pointer;
         text-transform: uppercase;
