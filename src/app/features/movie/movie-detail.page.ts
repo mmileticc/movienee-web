@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { environment } from '../../../environments/environment';
@@ -27,6 +28,7 @@ import { ImageViewerService } from '../../shared/ui/image-viewer';
 import { PosterRow } from '../../shared/ui/poster-row';
 import { RatingStars } from '../../shared/ui/rating-stars';
 import { SnackbarService } from '../../shared/ui/snackbar';
+import { ShareDialogService } from './share-dialog';
 import { ErrorState, Spinner } from '../../shared/ui/states';
 import { TrailerPlayer } from '../../shared/ui/trailer-player';
 import { CommentsSection } from './comments-section';
@@ -63,6 +65,7 @@ export class MovieDetailPage {
   private readonly pageTitle = inject(PageTitle);
   private readonly router = inject(Router);
   private readonly snackbar = inject(SnackbarService);
+  private readonly shareDialog = inject(ShareDialogService);
   protected readonly language = inject(LanguageService);
   protected readonly session = inject(SessionStore);
   protected readonly library = inject(LibraryStore);
@@ -127,6 +130,12 @@ export class MovieDetailPage {
     return movie ? this.library.historyItem(movie.id) : undefined;
   });
 
+  /** Friends who watched this movie (signed in only; silently empty when it fails). */
+  protected readonly friendsWatched = rxResource({
+    params: () => (this.session.isSignedIn() ? Number(this.id()) : null),
+    stream: ({ params }) => (params ? this.movieApi.friendsWhoWatched(params) : of([])),
+  });
+
   constructor() {
     effect(() => this.pageTitle.set(this.current()?.title));
     effect(() => {
@@ -150,6 +159,14 @@ export class MovieDetailPage {
     const movie = this.snapshot();
     if (!movie || this.requireSignIn('movie_detail_rate_signin_toast')) return;
     if (!(await this.library.setRating(movie, rating))) this.showError('library_rating_failed');
+  }
+
+  protected async sendToFriend(): Promise<void> {
+    const movie = this.current();
+    if (!movie || this.requireSignIn('share_friend_signin_toast')) return;
+    if (await this.shareDialog.open(movie.id, movie.title)) {
+      this.snackbar.show(this.transloco.translate('share_friend_sent'));
+    }
   }
 
   private snapshot(): MovieSnapshot | null {

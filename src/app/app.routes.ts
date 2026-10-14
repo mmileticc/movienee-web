@@ -1,11 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 
-// Every screen is lazy-loaded. Screens not built yet use the temporary UnderConstructionPage; each
-// phase of the plan replaces them with the real feature components.
-const underConstruction = () =>
-  import('./features/placeholder/under-construction.page').then((m) => m.UnderConstructionPage);
-
+// Every screen is lazy-loaded; screens that need an account are behind authGuard.
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/home/home.page').then((m) => m.HomePage) },
   {
@@ -43,27 +39,26 @@ export const routes: Routes = [
   },
   {
     path: 'friends',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'nav_friends' },
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/friends/friends.page').then((m) => m.FriendsPage),
   },
   {
     path: 'friends/:friendId',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'nav_friends' },
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/friends/friend-profile.page').then((m) => m.FriendProfilePage),
   },
   {
     path: 'friends/:friendId/movie-night',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'nav_friends' },
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/friends/movie-night.page').then((m) => m.MovieNightPage),
   },
   {
     path: 'notifications',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'notifications_title' },
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/notifications/notifications.page').then((m) => m.NotificationsPage),
   },
   {
     path: 'profile',

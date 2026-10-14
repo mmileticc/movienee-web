@@ -1,0 +1,74 @@
+.page {
+  max-width: 860px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  color: var(--text-2);
+  font-weight: 500;
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+}
+
+.score {
+  color: var(--gold);
+}
+
+.bars {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  max-width: 420px;
+
+  .bar {
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: inherit;
+    }
+  }
+  .friend span {
+    background: var(--gold);
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.after {
+  margin-top: var(--space-5);
+}
+
+.load-more {
+  display: flex;
+  margin: var(--space-5) auto 0;
+}
+
+.sentinel {
+  height: 1px;
+}

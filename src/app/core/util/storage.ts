@@ -42,7 +42,7 @@ export const storage = {
 export const StorageKeys = {
   theme: 'movienee.theme',
   language: 'movienee.lang',
-  session: 'movienee.session.v1',
+  user: 'movienee.user.v1',
   browseViewMode: 'movienee.browseViewMode',
   recentSearches: (scopeId: string) => `movienee.recentSearches.${scopeId}`,
 } as const;

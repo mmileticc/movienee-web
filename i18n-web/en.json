@@ -7,9 +7,9 @@
   "web_not_found_title": "Page not found",
   "web_not_found_body": "The link may be wrong or the page no longer exists.",
   "web_back_home": "Back to home",
-  "web_under_construction": "This screen is under construction.",
   "web_link_copied": "Link copied",
   "web_share_failed": "Sharing failed",
   "web_location_unavailable": "Location isn't available - allow location access in your browser to sort cinemas by distance.",
-  "web_load_more": "Load more"
+  "web_load_more": "Load more",
+  "web_movie_night": "Movie Night"
 }

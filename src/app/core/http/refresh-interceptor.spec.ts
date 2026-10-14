@@ -15,11 +15,12 @@ describe('refreshInterceptor', () => {
   let http: HttpClient;
   let controller: HttpTestingController;
   let session: SessionStore;
-  const auth = { refreshSession: vi.fn(), signOut: vi.fn() };
+  const auth = { refreshSession: vi.fn(), restoreSession: vi.fn(), signOut: vi.fn() };
 
   beforeEach(() => {
     localStorage.clear();
     auth.refreshSession.mockReset();
+    auth.restoreSession.mockReset();
     auth.signOut.mockReset();
     TestBed.configureTestingModule({
       providers: [
@@ -90,5 +91,89 @@ describe('refreshInterceptor', () => {
     await guest;
 
     expect(auth.refreshSession).not.toHaveBeenCalled();
+  });
+
+  it('never writes the token to localStorage', () => {
+    expect(JSON.stringify({ ...localStorage })).not.toContain('old-token');
+    expect(localStorage.getItem('movienee.user.v1')).toContain('u1');
+  });
+});
+
+describe('authInterceptor after a page load', () => {
+  let http: HttpClient;
+  let controller: HttpTestingController;
+  const auth = { refreshSession: vi.fn(), restoreSession: vi.fn(), signOut: vi.fn() };
+
+  function setUp(): void {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([refreshInterceptor, authInterceptor])),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: auth },
+      ],
+    });
+    http = TestBed.inject(HttpClient);
+    controller = TestBed.inject(HttpTestingController);
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    auth.restoreSession.mockReset();
+  });
+
+  afterEach(() => controller.verify());
+
+  it('renews the token once for parallel requests before sending them', async () => {
+    localStorage.setItem('movienee.user.v1', JSON.stringify({ id: 'u1' }));
+    let finish!: (token: string) => void;
+    auth.restoreSession.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    setUp();
+    expect(TestBed.inject(SessionStore).isSignedIn()).toBe(true);
+
+    http.get(API).subscribe();
+    http.get(API).subscribe();
+    controller.expectNone(API);
+    finish('fresh');
+    await new Promise((r) => setTimeout(r));
+
+    const requests = controller.match(API);
+    expect(requests.map((r) => r.request.headers.get('Authorization'))).toEqual([
+      'Bearer fresh',
+      'Bearer fresh',
+    ]);
+    requests.forEach((r) => r.flush({}));
+  });
+
+  it('sends the request without a token when renewing is not possible', async () => {
+    localStorage.setItem('movienee.user.v1', JSON.stringify({ id: 'u1' }));
+    auth.restoreSession.mockResolvedValue(null);
+    setUp();
+
+    http.get(`${environment.apiBaseUrl}/api/movies/trending`).subscribe();
+    await new Promise((r) => setTimeout(r));
+
+    const req = controller.expectOne(`${environment.apiBaseUrl}/api/movies/trending`);
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
+  });
+
+  it('moves an old stored session to the identity only, dropping its token', () => {
+    localStorage.setItem(
+      'movienee.session.v1',
+      JSON.stringify({ appToken: 'leaked', user: { ...USER, email: 'a@b.c' } }),
+    );
+    setUp();
+
+    const session = TestBed.inject(SessionStore);
+    expect(session.userId()).toBe('u1');
+    expect(session.token()).toBeNull();
+    expect(localStorage.getItem('movienee.session.v1')).toBeNull();
+    expect(JSON.stringify({ ...localStorage })).not.toMatch(/leaked|a@b\.c/);
+  });
+
+  it('ignores a malformed stored identity', () => {
+    localStorage.setItem('movienee.user.v1', '{"id": 42}');
+    setUp();
+    expect(TestBed.inject(SessionStore).isSignedIn()).toBe(false);
   });
 });

@@ -64,6 +64,10 @@
               }}</span>
               {{ (watched() ? 'movie_detail_watched' : 'movie_detail_mark_watched') | transloco }}
             </button>
+            <button class="btn" type="button" (click)="sendToFriend()">
+              <span class="icon" aria-hidden="true">send</span>
+              {{ 'share_menu_friend' | transloco }}
+            </button>
             <button class="btn" type="button" (click)="share()">
               <span class="icon" aria-hidden="true">share</span>
               {{ 'share_menu_link' | transloco }}
@@ -81,6 +85,29 @@
             }}</span>
             <app-rating-stars [value]="watched()?.user_rating ?? 0" (rate)="rate($event)" />
           </div>
+
+          @if (friendsWatched.value()?.length) {
+            <p class="friends-watched">
+              <span class="icon" aria-hidden="true">group</span>
+              <span>
+                {{
+                  friendsWatched.value()!.length === 1
+                    ? ('movie_detail_friends_watched_one' | transloco)
+                    : ('movie_detail_friends_watched_many'
+                      | transloco: { p1: friendsWatched.value()!.length })
+                }}:
+                @for (friend of friendsWatched.value(); track friend.friend_id; let last = $last) {
+                  <a [routerLink]="['/friends', friend.friend_id]">{{ friend.friend_name }}</a>
+                  @if (friend.rating) {
+                    ({{ friend.rating }}/10)
+                  }
+                  @if (!last) {
+                    ,
+                  }
+                }
+              </span>
+            </p>
+          }
 
           @if (m.genres.length > 0) {
             <ul class="genres" [attr.aria-label]="'movie_detail_genres_header' | transloco">

@@ -105,6 +105,25 @@
   }
 }
 
+.friends-watched {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--text-2);
+  font-size: 0.9375rem;
+
+  .icon {
+    color: var(--gold);
+  }
+  a {
+    color: var(--text);
+    font-weight: 600;
+    &:hover {
+      color: var(--accent);
+    }
+  }
+}
+
 .your-rating {
   display: flex;
   flex-wrap: wrap;

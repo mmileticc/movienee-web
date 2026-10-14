@@ -1,0 +1,85 @@
+<div class="page">
+  <a class="back" [routerLink]="['/friends', friendId()]">
+    <span class="icon" aria-hidden="true">arrow_back</span>
+    {{ friendName() ?? ('friends_top_bar_title' | transloco) }}
+  </a>
+
+  <header class="head card">
+    <h1 class="t-headline">
+      {{
+        friendName()
+          ? ('movie_night_title_with_friend' | transloco: { p1: friendName() })
+          : ('movie_night_top_bar_title' | transloco)
+      }}
+    </h1>
+    @if (matchScore() !== null) {
+      <p class="t-title score">
+        {{ 'movie_night_match_score' | transloco: { p1: percent(matchScore()!) } }}
+      </p>
+    }
+    @if (topScores(); as scores) {
+      <div class="bars">
+        <span class="t-small">{{ 'movie_night_your_match_label' | transloco }}</span>
+        <span class="bar" aria-hidden="true"
+          ><span [style.width.%]="percent(scores.your_match)"></span
+        ></span>
+        <span class="t-small">{{ 'movie_night_friend_match_label' | transloco }}</span>
+        <span class="bar friend" aria-hidden="true"
+          ><span [style.width.%]="percent(scores.their_match)"></span
+        ></span>
+      </div>
+    }
+    @if (sharedGenres().length > 0) {
+      <div class="chips" role="group" [attr.aria-label]="'movie_detail_genres_header' | transloco">
+        @for (genre of sharedGenres(); track genre.id) {
+          <button
+            class="chip"
+            type="button"
+            [attr.aria-pressed]="selectedGenre() === genre.id"
+            (click)="toggleGenre(genre.id)"
+          >
+            {{ genre.name }}
+          </button>
+        }
+      </div>
+    }
+  </header>
+
+  @if (visible().length > 0) {
+    <div class="list-stack">
+      @for (suggestion of visible(); track suggestion.tmdb_id) {
+        <app-movie-list-row
+          [movieId]="suggestion.tmdb_id"
+          [title]="suggestion.title"
+          [posterPath]="suggestion.poster_path"
+          [meta]="meta(suggestion)"
+          [description]="suggestion.match_reason"
+        />
+      }
+    </div>
+  } @else if (!loading() && !error()) {
+    <app-empty-state
+      icon="local_movies"
+      [heading]="
+        (selectedGenre() !== null ? 'browse_empty_filtered' : 'movie_night_empty_state') | transloco
+      "
+      [message]="selectedGenre() !== null ? ('movie_night_filter_empty_hint' | transloco) : null"
+    />
+  }
+
+  @if (error(); as e) {
+    <app-error-state class="after" [error]="e" (retry)="loadMore()" />
+  } @else if (loading()) {
+    <app-spinner />
+  } @else if (hasMore()) {
+    <button class="btn load-more" type="button" (click)="loadMore()">
+      {{ 'web_load_more' | transloco }}
+    </button>
+  }
+  <div
+    class="sentinel"
+    appInViewport
+    [watch]="suggestions().length"
+    (inViewport)="loadMore()"
+  ></div>
+</div>

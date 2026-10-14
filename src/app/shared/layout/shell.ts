@@ -4,6 +4,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { SessionStore } from '../../core/auth/session.store';
 import { LanguageService } from '../../core/prefs/language.service';
 import { ThemeService } from '../../core/prefs/theme.service';
+import { SocialStore } from '../../core/state/social.store';
 import { avatarUrl } from '../../core/util/image-url';
 import { Snackbar } from '../ui/snackbar';
 
@@ -29,6 +30,8 @@ export class Shell {
   protected readonly session = inject(SessionStore);
   protected readonly language = inject(LanguageService);
   protected readonly theme = inject(ThemeService);
+  /** Also starts the badge polling for a signed-in user. */
+  protected readonly social = inject(SocialStore);
 
   protected readonly navItems: NavItem[] = [
     { path: '/', labelKey: 'nav_home', icon: 'home', exact: true },
@@ -37,6 +40,11 @@ export class Shell {
     { path: '/friends', labelKey: 'nav_friends', icon: 'group', exact: false },
     { path: '/profile', labelKey: 'nav_profile', icon: 'person', exact: false },
   ];
+
+  /** Badge number per navigation item (incoming friend requests on Friends). */
+  protected badge(path: string): number {
+    return path === '/friends' && this.session.isSignedIn() ? this.social.incoming().length : 0;
+  }
 
   protected readonly avatar = computed(() => avatarUrl(this.session.user()?.avatarUrl));
 

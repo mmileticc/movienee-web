@@ -1,0 +1,102 @@
+@if (profile.value(); as p) {
+  <div class="page">
+    <a class="back" routerLink="/friends">
+      <span class="icon" aria-hidden="true">arrow_back</span>
+      {{ 'friends_top_bar_title' | transloco }}
+    </a>
+
+    <header class="head">
+      <app-user-avatar [url]="p.avatar_url" [name]="p.username" [size]="88" />
+      <div class="who">
+        <h1 class="t-headline">{{ p.username }}</h1>
+        @if (p.bio) {
+          <p class="t-body-lg t-secondary bio">{{ p.bio }}</p>
+        }
+        @if (!locked()) {
+          <p class="t-small t-muted">
+            {{ 'friend_profile_watched_count' | transloco: { p1: p.watched_movies.length } }}
+          </p>
+        }
+      </div>
+    </header>
+
+    @if (locked()) {
+      @if (p.common_genres?.length) {
+        <section class="section card">
+          <h2 class="t-title">{{ 'friend_profile_common_genres_header' | transloco }}</h2>
+          <ul class="genres">
+            @for (genre of p.common_genres; track genre) {
+              <li class="chip">{{ genre }}</li>
+            }
+          </ul>
+        </section>
+      }
+      <p class="section t-body t-secondary note">
+        <span class="icon" aria-hidden="true">lock</span>
+        {{
+          (status() === 'PENDING_RECEIVED'
+            ? 'friend_profile_pending_received_note'
+            : 'friend_profile_locked_note'
+          ) | transloco
+        }}
+      </p>
+    } @else {
+      <section class="section">
+        @if (p.watched_movies.length === 0) {
+          <p class="t-body t-secondary">{{ 'friend_profile_empty' | transloco }}</p>
+        }
+        <div class="list-stack">
+          @for (movie of p.watched_movies; track movie.tmdb_id) {
+            <app-movie-list-row
+              [movieId]="movie.tmdb_id"
+              [title]="movie.title"
+              [posterPath]="movie.poster_path"
+              [meta]="rating(movie)"
+            />
+          }
+        </div>
+      </section>
+    }
+  </div>
+
+  <div class="action-bar">
+    @switch (status()) {
+      @case ('ACCEPTED') {
+        <a class="btn primary" [routerLink]="['/friends', p.id, 'movie-night']">
+          <span class="icon" aria-hidden="true">local_movies</span>
+          {{ 'friend_profile_movie_night_cta' | transloco }}
+        </a>
+      }
+      @case ('PENDING_SENT') {
+        <button class="btn" type="button" [disabled]="social.isBusy(p.id)" (click)="cancel()">
+          {{ 'profile_cancel_request' | transloco }}
+        </button>
+      }
+      @case ('PENDING_RECEIVED') {
+        <button class="btn" type="button" [disabled]="social.isBusy(p.id)" (click)="reject()">
+          {{ 'profile_reject_content_description' | transloco }}
+        </button>
+        <button
+          class="btn primary"
+          type="button"
+          [disabled]="social.isBusy(p.id)"
+          (click)="accept()"
+        >
+          {{ 'profile_accept_request' | transloco }}
+        </button>
+      }
+      @default {
+        <button class="btn primary" type="button" [disabled]="social.isBusy(p.id)" (click)="add()">
+          <span class="icon" aria-hidden="true">person_add</span>
+          {{ 'profile_add_friend' | transloco }}
+        </button>
+      }
+    }
+  </div>
+} @else if (error(); as e) {
+  <div class="page">
+    <app-error-state [error]="e" (retry)="profile.reload()" />
+  </div>
+} @else {
+  <app-spinner />
+}

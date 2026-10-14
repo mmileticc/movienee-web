@@ -7,9 +7,9 @@
   "web_not_found_title": "Stranica ne postoji",
   "web_not_found_body": "Link je možda pogrešan ili stranica više ne postoji.",
   "web_back_home": "Nazad na početnu",
-  "web_under_construction": "Ovaj ekran je u izradi.",
   "web_link_copied": "Link je kopiran",
   "web_share_failed": "Deljenje nije uspelo",
   "web_location_unavailable": "Lokacija nije dostupna - dozvoli pristup lokaciji u pregledaču da bismo sortirali bioskope po udaljenosti.",
-  "web_load_more": "Učitaj još"
+  "web_load_more": "Učitaj još",
+  "web_movie_night": "Movie Night"
 }

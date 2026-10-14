@@ -1,0 +1,31 @@
+<div class="page">
+  <h1 class="t-headline title">{{ 'notifications_title' | transloco }}</h1>
+
+  @if (error(); as e) {
+    <app-error-state [error]="e" (retry)="load()" />
+  } @else if (items() === null) {
+    <app-spinner />
+  } @else if (entries().length === 0) {
+    <app-empty-state icon="notifications_none" [heading]="'notifications_empty' | transloco" />
+  } @else {
+    <ul class="list">
+      @for (entry of entries(); track entry.item.id) {
+        <li>
+          <a class="entry" [class.new]="entry.isNew" [routerLink]="entry.content.link">
+            <span class="icon badge" aria-hidden="true">{{ entry.content.icon }}</span>
+            <span class="text">
+              <span class="t-title">{{ entry.content.title }}</span>
+              <span class="t-body t-secondary body">{{ entry.content.body }}</span>
+              @if (entry.date) {
+                <span class="t-small t-muted">{{ entry.date }}</span>
+              }
+            </span>
+            @if (entry.isNew) {
+              <span class="dot" aria-hidden="true"></span>
+            }
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</div>

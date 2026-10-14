@@ -1,0 +1,92 @@
+.page {
+  max-width: 860px;
+}
+
+.title {
+  margin-bottom: var(--space-5);
+}
+
+.search {
+  position: relative;
+  display: block;
+  margin-bottom: var(--space-3);
+
+  .icon {
+    position: absolute;
+    left: var(--space-4);
+    top: 50%;
+    translate: 0 -50%;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  .text-input {
+    padding-left: 48px;
+  }
+}
+
+.cards {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  &:hover .t-title {
+    color: var(--accent);
+  }
+}
+
+.details {
+  display: grid;
+  min-width: 0;
+}
+
+.match {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.btn.small {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  font-size: 0.875rem;
+  white-space: nowrap;
+
+  .icon {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .person {
+    flex-wrap: wrap;
+  }
+  .who {
+    flex-basis: 100%;
+  }
+  .person > .btn,
+  .person > .icon-btn {
+    margin-left: auto;
+  }
+  .person > .btn + .icon-btn {
+    margin-left: 0;
+  }
+}

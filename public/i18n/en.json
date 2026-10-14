@@ -361,12 +361,12 @@
   "web_link_copied": "Link copied",
   "web_load_more": "Load more",
   "web_location_unavailable": "Location isn't available - allow location access in your browser to sort cinemas by distance.",
+  "web_movie_night": "Movie Night",
   "web_not_found_body": "The link may be wrong or the page no longer exists.",
   "web_not_found_title": "Page not found",
   "web_share_failed": "Sharing failed",
   "web_skip_to_content": "Skip to content",
   "web_theme_dark": "Dark theme",
   "web_theme_light": "Light theme",
-  "web_theme_system": "System theme",
-  "web_under_construction": "This screen is under construction."
+  "web_theme_system": "System theme"
 }

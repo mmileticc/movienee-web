@@ -25,7 +25,8 @@ interface FirebaseModules {
 
 /**
  * Sign-in: Google via Firebase Authentication, then the Firebase ID token is exchanged for the
- * backend's own JWT (`POST /api/auth/firebase`), stored in SessionStore. Same flow as the Android app.
+ * backend's own JWT (`POST /api/auth/firebase`), kept in memory by SessionStore. Same flow as the
+ * Android app. After a page load the JWT is renewed from the Firebase session (`restoreSession`).
  *
  * The Firebase SDK is loaded lazily (dynamic import) the first time it is needed, so visitors who
  * never sign in do not download it.
@@ -77,7 +78,7 @@ export class AuthService {
       const user = auth.currentUser;
       if (!user) throw new SessionExpiredError();
       try {
-        return await this.exchange(await user.getIdToken(true));
+        return await this.exchange(await user.getIdToken(true), true);
       } catch (error) {
         const rejected =
           error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403);
@@ -91,19 +92,36 @@ export class AuthService {
     return this.refreshing;
   }
 
+  /**
+   * The token for a signed-in user whose token is not in memory yet (after a page load): renewed
+   * from the Firebase session. Resolves to null when that is not possible right now; a session that
+   * really ended signs the user out.
+   */
+  async restoreSession(): Promise<string | null> {
+    try {
+      return await this.refreshSession();
+    } catch (error) {
+      if (error instanceof SessionExpiredError) await this.signOut();
+      return null;
+    }
+  }
+
   /** Signs out of Firebase and clears the backend session. */
   async signOut(): Promise<void> {
     this.session.clear();
-    if (!this.firebase) return;
-    const { auth, mod } = await this.firebase;
+    // Firebase keeps its own session (IndexedDB) across reloads, so it is loaded here even if this
+    // page never needed it; otherwise the device would stay signed in to Firebase.
+    const { auth, mod } = await this.loadFirebase();
     await mod.signOut(auth);
   }
 
-  private async exchange(idToken: string): Promise<string> {
+  /** `renewing`: a renewal that finishes after the user signed out must not sign them back in. */
+  private async exchange(idToken: string, renewing = false): Promise<string> {
     const response = await firstValueFrom(
       this.http.post<AuthResponse>(apiUrl('/api/auth/firebase'), { idToken }),
     );
     if (!response?.appToken) throw new Error('No token in the sign-in response');
+    if (renewing && !this.session.isSignedIn()) throw new SessionExpiredError();
     this.session.save(response.appToken, response.user);
     return response.appToken;
   }

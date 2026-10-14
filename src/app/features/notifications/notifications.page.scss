@@ -1,0 +1,65 @@
+.page {
+  max-width: 760px;
+}
+
+.title {
+  margin-bottom: var(--space-5);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  }
+
+  &.new {
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface-1));
+  }
+}
+
+.badge {
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--accent);
+  font-size: 22px;
+}
+
+.text {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.body {
+  overflow-wrap: anywhere;
+}
+
+.dot {
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}

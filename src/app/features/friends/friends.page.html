@@ -1,0 +1,193 @@
+<div class="page">
+  <h1 class="t-headline title">{{ 'friends_top_bar_title' | transloco }}</h1>
+
+  @if (social.incoming().length > 0) {
+    <section class="section">
+      <h2 class="t-title-lg section-title">{{ 'profile_friend_requests_header' | transloco }}</h2>
+      <ul class="cards">
+        @for (request of social.incoming(); track request.id) {
+          <li class="person">
+            <a class="who" [routerLink]="['/friends', request.id]">
+              <app-user-avatar [url]="request.avatar_url" [name]="request.username" />
+              <span class="t-title">{{ request.username }}</span>
+            </a>
+            <button
+              class="btn small primary"
+              type="button"
+              [disabled]="social.isBusy(request.id)"
+              (click)="accept(request)"
+            >
+              {{ 'profile_accept_request' | transloco }}
+            </button>
+            <button
+              class="icon-btn"
+              type="button"
+              [disabled]="social.isBusy(request.id)"
+              (click)="reject(request)"
+              [attr.aria-label]="'profile_reject_content_description' | transloco"
+            >
+              <span class="icon" aria-hidden="true">close</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <section class="section">
+    <label class="search">
+      <span class="icon" aria-hidden="true">person_search</span>
+      <input
+        class="text-input"
+        type="search"
+        autocomplete="off"
+        [value]="query()"
+        (input)="onInput($any($event.target).value)"
+        [placeholder]="'profile_search_users_label' | transloco"
+        [attr.aria-label]="'profile_search_users_label' | transloco"
+      />
+    </label>
+
+    @if (searchError(); as e) {
+      <app-error-state [error]="e" [retryable]="false" />
+    } @else if (results(); as users) {
+      @if (users.length === 0 && !searching()) {
+        <p class="t-body t-secondary">
+          {{ 'profile_search_no_results' | transloco: { p1: query() } }}
+        </p>
+      }
+      <ul class="cards">
+        @for (user of users; track user.id) {
+          <li class="person">
+            <a class="who" [routerLink]="['/friends', user.id]">
+              <app-user-avatar [url]="user.avatar_url" [name]="user.username" />
+              <span class="t-title">{{ user.username }}</span>
+            </a>
+            @switch (social.statusOf(user)) {
+              @case ('ACCEPTED') {
+                <span class="t-small t-secondary">{{ 'profile_already_friends' | transloco }}</span>
+              }
+              @case ('PENDING_SENT') {
+                <button
+                  class="btn small"
+                  type="button"
+                  [disabled]="social.isBusy(user.id)"
+                  (click)="cancel(user)"
+                >
+                  {{ 'profile_cancel_request' | transloco }}
+                </button>
+              }
+              @case ('PENDING_RECEIVED') {
+                <button
+                  class="btn small primary"
+                  type="button"
+                  [disabled]="social.isBusy(user.id)"
+                  (click)="accept(user)"
+                >
+                  {{ 'profile_accept_request' | transloco }}
+                </button>
+              }
+              @default {
+                <button
+                  class="btn small primary"
+                  type="button"
+                  [disabled]="social.isBusy(user.id)"
+                  (click)="add(user)"
+                >
+                  <span class="icon" aria-hidden="true">person_add</span>
+                  {{ 'profile_add_friend' | transloco }}
+                </button>
+              }
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (social.error(); as e) {
+    <app-error-state class="section" [error]="e" (retry)="social.load()" />
+  } @else if (social.friends() === null) {
+    <app-spinner />
+  } @else {
+    @if (social.sent().length > 0) {
+      <section class="section">
+        <h2 class="t-title-lg section-title">{{ 'profile_sent_requests_header' | transloco }}</h2>
+        <ul class="cards">
+          @for (request of social.sent(); track request.id) {
+            <li class="person">
+              <a class="who" [routerLink]="['/friends', request.id]">
+                <app-user-avatar [url]="request.avatar_url" [name]="request.username" />
+                <span class="t-title">{{ request.username }}</span>
+              </a>
+              <button
+                class="btn small"
+                type="button"
+                [disabled]="social.isBusy(request.id)"
+                (click)="cancel(request)"
+              >
+                {{ 'profile_cancel_request' | transloco }}
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <section class="section">
+      <h2 class="t-title-lg section-title">{{ 'profile_friends_header' | transloco }}</h2>
+      @if (social.friends()!.length === 0) {
+        <app-empty-state icon="group_add" [heading]="'profile_friends_empty' | transloco" />
+      }
+      <ul class="cards">
+        @for (friend of social.friends(); track friend.friend_id) {
+          <li class="person">
+            <a class="who" [routerLink]="['/friends', friend.friend_id]">
+              <app-user-avatar [url]="friend.avatar" [name]="friend.username" [size]="48" />
+              <span class="details">
+                <span class="t-title">{{ friend.username }}</span>
+                @if (friend.match_score > 0) {
+                  <span class="t-small match">{{
+                    'profile_match_percent' | transloco: { p1: percent(friend.match_score) }
+                  }}</span>
+                }
+                @if (friend.common_genres.length > 0) {
+                  <span class="t-small t-secondary">{{ friend.common_genres.join(', ') }}</span>
+                }
+              </span>
+            </a>
+            <a class="btn small" [routerLink]="['/friends', friend.friend_id, 'movie-night']">
+              <span class="icon" aria-hidden="true">local_movies</span>
+              {{ 'web_movie_night' | transloco }}
+            </a>
+            <button
+              class="icon-btn"
+              type="button"
+              [disabled]="social.isBusy(friend.friend_id)"
+              (click)="remove(friend.friend_id, friend.username)"
+              [attr.aria-label]="'profile_remove_friend_menu' | transloco"
+            >
+              <span class="icon" aria-hidden="true">person_remove</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+
+    @if (social.activity().length > 0) {
+      <section class="section">
+        <h2 class="t-title-lg section-title">{{ 'profile_friend_activity_header' | transloco }}</h2>
+        <div class="list-stack">
+          @for (activity of social.activity(); track activity.activity_id) {
+            <app-movie-list-row
+              [movieId]="activity.tmdb_id"
+              [title]="activity.movie_title"
+              [posterPath]="activity.poster_path"
+              [meta]="activityText(activity)"
+            />
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

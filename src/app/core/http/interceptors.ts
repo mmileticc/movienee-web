@@ -18,11 +18,26 @@ export const languageInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req.clone({ setHeaders: { 'Accept-Language': language } }));
 };
 
-/** Adds `Authorization: Bearer <appToken>` to backend requests when a session exists. */
+/** The sign-in exchange itself must never wait for (or trigger) a session renewal. */
+function isAuthExchange(url: string): boolean {
+  return url.includes('/api/auth/firebase');
+}
+
+/**
+ * Adds `Authorization: Bearer <appToken>` to backend requests when a session exists. The token is
+ * kept only in memory, so after a page load the first backend request of a signed-in user waits for
+ * it to be renewed from the Firebase session (one shared renewal for all requests). If that is not
+ * possible right now the request goes out without a token; a session that really ended signs out.
+ */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (!isBackendRequest(req.url)) return next(req);
-  const token = inject(SessionStore).token();
-  return next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
+  const session = inject(SessionStore);
+  const send = (token: string | null) =>
+    next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
+
+  const token = session.token();
+  if (token || !session.isSignedIn() || isAuthExchange(req.url)) return send(token);
+  return from(inject(AuthService).restoreSession()).pipe(switchMap(send));
 };
 
 /**
@@ -33,7 +48,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
  * keeps the session. Either way the original 401 is passed on.
  */
 export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
-  if (!isBackendRequest(req.url) || req.url.includes('/api/auth/firebase')) return next(req);
+  if (!isBackendRequest(req.url) || isAuthExchange(req.url)) return next(req);
   const session = inject(SessionStore);
   const auth = inject(AuthService);
 
