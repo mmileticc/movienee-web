@@ -37,6 +37,33 @@
           </div>
 
           <div class="actions">
+            <button
+              class="btn"
+              [class.active]="inWatchlist()"
+              type="button"
+              (click)="toggleWatchlist()"
+              [attr.aria-pressed]="inWatchlist()"
+            >
+              <span class="icon" [class.filled]="inWatchlist()" aria-hidden="true">{{
+                inWatchlist() ? 'bookmark_added' : 'bookmark_add'
+              }}</span>
+              {{
+                (inWatchlist() ? 'movie_detail_watchlist_added' : 'movie_detail_watchlist_add')
+                  | transloco
+              }}
+            </button>
+            <button
+              class="btn"
+              [class.active]="!!watched()"
+              type="button"
+              (click)="toggleWatched()"
+              [attr.aria-pressed]="!!watched()"
+            >
+              <span class="icon" [class.filled]="!!watched()" aria-hidden="true">{{
+                watched() ? 'check_circle' : 'visibility'
+              }}</span>
+              {{ (watched() ? 'movie_detail_watched' : 'movie_detail_mark_watched') | transloco }}
+            </button>
             <button class="btn" type="button" (click)="share()">
               <span class="icon" aria-hidden="true">share</span>
               {{ 'share_menu_link' | transloco }}
@@ -44,6 +71,15 @@
             @if (shareFeedback(); as feedback) {
               <span class="feedback" role="status">{{ feedback }}</span>
             }
+          </div>
+
+          <div class="your-rating">
+            <span class="t-label t-secondary">{{
+              watched()?.user_rating
+                ? ('movie_detail_your_rating_value' | transloco: { p1: watched()!.user_rating })
+                : ('movie_detail_your_rating' | transloco)
+            }}</span>
+            <app-rating-stars [value]="watched()?.user_rating ?? 0" (rate)="rate($event)" />
           </div>
 
           @if (m.genres.length > 0) {

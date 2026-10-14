@@ -23,6 +23,15 @@ export function formatDate(iso: string | null | undefined, lang: AppLanguage): s
   }).format(date);
 }
 
+/** A point in time (epoch milliseconds) as a short date: "12. okt 2026." / "12 Oct 2026". */
+export function formatTimestamp(epochMs: number, lang: AppLanguage): string {
+  return new Intl.DateTimeFormat(LOCALES[lang], {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(epochMs));
+}
+
 /** "1,2 km" / "1.2 km". */
 export function formatDistance(km: number, lang: AppLanguage): string {
   return `${new Intl.NumberFormat(LOCALES[lang], { maximumFractionDigits: 1 }).format(km)} km`;

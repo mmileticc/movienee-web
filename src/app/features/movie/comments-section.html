@@ -1,7 +1,22 @@
 <section>
   <h2 class="t-title-lg section-title">{{ 'movie_detail_comments_header' | transloco }}</h2>
 
-  @if (!session.isSignedIn()) {
+  @if (session.isSignedIn()) {
+    <form class="composer" (submit)="post($event)">
+      <textarea
+        class="input"
+        rows="2"
+        [maxLength]="maxLength"
+        [value]="draft()"
+        (input)="draft.set($any($event.target).value)"
+        [placeholder]="'movie_detail_comment_label' | transloco"
+        [attr.aria-label]="'movie_detail_comment_label' | transloco"
+      ></textarea>
+      <button class="btn primary" type="submit" [disabled]="!draft().trim()">
+        {{ 'movie_detail_post_comment' | transloco }}
+      </button>
+    </form>
+  } @else {
     <a class="btn sign-in" routerLink="/sign-in" [queryParams]="signInLink()">
       <span class="icon" aria-hidden="true">login</span>
       {{ 'movie_detail_comment_signin_button' | transloco }}
@@ -14,7 +29,7 @@
 
   <ul class="list">
     @for (comment of comments(); track comment.id) {
-      <li class="comment">
+      <li class="comment" [class.pending]="comment.id < 0">
         <span class="avatar">
           @if (avatar(comment); as src) {
             <img [src]="src" alt="" loading="lazy" />
@@ -31,18 +46,41 @@
             <span class="t-small t-muted">{{ date(comment.created_at) }}</span>
           </p>
           <p class="t-body-lg text">{{ comment.body }}</p>
-          @if (comment.like_count > 0) {
-            <p class="t-small t-secondary likes">
-              <span class="icon filled" aria-hidden="true">favorite</span>{{ comment.like_count }}
-            </p>
-          }
+          <div class="tools">
+            <button
+              class="like"
+              type="button"
+              [class.liked]="comment.liked_by_me"
+              [disabled]="comment.is_own || likePending().has(comment.id)"
+              [attr.aria-pressed]="comment.liked_by_me"
+              (click)="toggleLike(comment)"
+              [attr.aria-label]="'movie_detail_comment_like_content_description' | transloco"
+            >
+              <span class="icon" [class.filled]="comment.liked_by_me" aria-hidden="true"
+                >favorite</span
+              >
+              @if (comment.like_count > 0) {
+                <span>{{ comment.like_count }}</span>
+              }
+            </button>
+            @if (comment.is_own) {
+              <button
+                class="delete"
+                type="button"
+                (click)="remove(comment)"
+                [attr.aria-label]="'movie_detail_comment_delete_content_description' | transloco"
+              >
+                <span class="icon" aria-hidden="true">delete</span>
+              </button>
+            }
+          </div>
         </div>
       </li>
     }
   </ul>
 
   @if (error(); as e) {
-    <app-error-state [error]="e" (retry)="load(comments().length)" />
+    <app-error-state [error]="e" (retry)="loadMore()" />
   } @else if (hasMore()) {
     <button class="more" type="button" (click)="loadMore()" [disabled]="loading()">
       {{ 'movie_detail_comments_show_more' | transloco }}

@@ -1,0 +1,185 @@
+<div class="page">
+  <h1 class="t-headline title">{{ 'library_top_bar_title' | transloco }}</h1>
+
+  <div class="tabs" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'watchlist'"
+      (click)="selectTab('watchlist')"
+    >
+      {{ 'library_tab_watchlist' | transloco }}
+      @if (watchlistTotal() > 0) {
+        <span class="count">{{ watchlistTotal() }}</span>
+      }
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'watched'"
+      (click)="selectTab('watched')"
+    >
+      {{ 'library_tab_history' | transloco }}
+      @if (historyTotal() > 0) {
+        <span class="count">{{ historyTotal() }}</span>
+      }
+    </button>
+  </div>
+
+  @if (library.error(); as e) {
+    <app-error-state class="error" [error]="e" (retry)="library.reload()" />
+  }
+
+  @if (library.watchlist() === null && library.loading()) {
+    <app-spinner />
+  } @else if (watchlistTotal() + historyTotal() > 0) {
+    <div class="filters">
+      <div class="search">
+        <span class="icon" aria-hidden="true">search</span>
+        <input
+          class="text-input"
+          type="search"
+          [value]="query()"
+          (input)="query.set($any($event.target).value)"
+          [placeholder]="'browse_search_placeholder' | transloco"
+          [attr.aria-label]="'browse_search_placeholder' | transloco"
+        />
+      </div>
+      @if (activeTab() === 'watchlist') {
+        <select
+          class="select"
+          [value]="watchlistSort()"
+          (change)="setWatchlistSort($any($event.target).value)"
+          [attr.aria-label]="'browse_sort_content_description' | transloco"
+        >
+          @for (option of watchlistSorts; track option) {
+            <option [value]="option">{{ 'library_sort_' + option | transloco }}</option>
+          }
+        </select>
+      } @else {
+        <select
+          class="select"
+          [value]="historySort()"
+          (change)="setHistorySort($any($event.target).value)"
+          [attr.aria-label]="'browse_sort_content_description' | transloco"
+        >
+          @for (option of historySorts; track option) {
+            <option [value]="option">{{ 'library_sort_' + option | transloco }}</option>
+          }
+        </select>
+      }
+    </div>
+
+    <div class="chips">
+      @if (activeTab() === 'watched') {
+        @for (value of ratingThresholds; track value) {
+          <button
+            class="chip"
+            type="button"
+            [attr.aria-pressed]="minRating() === value"
+            (click)="toggleMinRating(value)"
+          >
+            <span class="icon filled star" aria-hidden="true">star</span>
+            {{ 'library_min_rating_chip' | transloco: { p1: value } }}
+          </button>
+        }
+      }
+      @for (genre of genres(); track genre.id) {
+        <button
+          class="chip"
+          type="button"
+          [attr.aria-pressed]="selectedGenres().includes(genre.id)"
+          (click)="toggleGenre(genre.id)"
+        >
+          {{ genre.name }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (library.watchlist() !== null) {
+    @if (activeTab() === 'watchlist') {
+      @if (watchlistItems().length > 0) {
+        <div class="list-stack">
+          @for (item of watchlistItems(); track item.tmdb_id) {
+            <app-movie-list-row
+              [movieId]="item.tmdb_id"
+              [title]="item.title"
+              [posterPath]="item.poster_path"
+              [meta]="watchlistMeta(item)"
+            >
+              <button
+                class="icon-btn"
+                type="button"
+                (click)="removeFromWatchlist(item)"
+                [attr.aria-label]="'library_remove_content_description' | transloco"
+              >
+                <span class="icon" aria-hidden="true">bookmark_remove</span>
+              </button>
+            </app-movie-list-row>
+          }
+        </div>
+      } @else if (watchlistTotal() > 0) {
+        <app-empty-state icon="filter_alt_off" [heading]="'browse_empty_filtered' | transloco" />
+      } @else {
+        <app-empty-state
+          icon="bookmark"
+          [heading]="'library_watchlist_empty_title' | transloco"
+          [message]="'library_watchlist_empty_message' | transloco"
+        >
+          <a class="btn primary" routerLink="/search">{{ 'library_find_movies' | transloco }}</a>
+        </app-empty-state>
+      }
+    } @else {
+      @if (historyItems().length > 0) {
+        <div class="list-stack">
+          @for (item of historyItems(); track item.tmdb_id) {
+            <div class="history-item">
+              <app-movie-list-row
+                [movieId]="item.tmdb_id"
+                [title]="item.title"
+                [posterPath]="item.poster_path"
+                [meta]="historyMeta(item)"
+              >
+                <button
+                  class="icon-btn"
+                  type="button"
+                  [attr.aria-expanded]="editingRating() === item.tmdb_id"
+                  (click)="
+                    editingRating.set(editingRating() === item.tmdb_id ? null : item.tmdb_id)
+                  "
+                  [attr.aria-label]="'library_rating_edit_content_description' | transloco"
+                >
+                  <span class="icon" aria-hidden="true">edit</span>
+                </button>
+                <button
+                  class="icon-btn"
+                  type="button"
+                  (click)="removeFromHistory(item)"
+                  [attr.aria-label]="'library_remove_from_history_content_description' | transloco"
+                >
+                  <span class="icon" aria-hidden="true">delete</span>
+                </button>
+              </app-movie-list-row>
+              @if (editingRating() === item.tmdb_id) {
+                <div class="rating-editor">
+                  <app-rating-stars [value]="item.user_rating" (rate)="rate(item, $event)" />
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else if (historyTotal() > 0) {
+        <app-empty-state icon="filter_alt_off" [heading]="'browse_empty_filtered' | transloco" />
+      } @else {
+        <app-empty-state
+          icon="check_circle"
+          [heading]="'library_history_empty_title' | transloco"
+          [message]="'library_history_empty_message' | transloco"
+        >
+          <a class="btn primary" routerLink="/search">{{ 'library_find_movies' | transloco }}</a>
+        </app-empty-state>
+      }
+    }
+  }
+</div>

@@ -4,6 +4,58 @@
     <p class="t-body-lg t-secondary">{{ 'home_header_subtitle' | transloco }}</p>
   </header>
 
+  @if (session.isSignedIn() && (suggested.value() ?? []).length > 0) {
+    <app-poster-row
+      class="section"
+      [heading]="'home_section_personalized' | transloco"
+      seeAllLink="/browse/suggested"
+    >
+      @for (movie of suggested.value(); track movie.id) {
+        <app-movie-poster-card
+          [movieId]="movie.id"
+          [title]="movie.title"
+          [posterPath]="movie.poster_path"
+          [rating]="rating(movie.vote_average)"
+          [caption]="year(movie.release_date)"
+        />
+      }
+    </app-poster-row>
+  }
+
+  @if (watchlistRow().length > 0) {
+    <app-poster-row
+      class="section"
+      [heading]="'home_section_continue_watching' | transloco"
+      seeAllLink="/library"
+    >
+      @for (item of watchlistRow(); track item.tmdb_id) {
+        <app-movie-poster-card
+          [movieId]="item.tmdb_id"
+          [title]="item.title"
+          [posterPath]="item.poster_path"
+          [caption]="item.release_year ? '' + item.release_year : null"
+        />
+      }
+    </app-poster-row>
+  }
+
+  @if (friendsRow().length > 0) {
+    <app-poster-row
+      class="section"
+      [heading]="'home_section_friends_watching' | transloco"
+      seeAllLink="/friends"
+    >
+      @for (activity of friendsRow(); track activity.activity_id) {
+        <app-movie-poster-card
+          [movieId]="activity.tmdb_id"
+          [title]="activity.movie_title"
+          [posterPath]="activity.poster_path"
+          [caption]="activityCaption(activity)"
+        />
+      }
+    </app-poster-row>
+  }
+
   @if (cinemaRow().length > 0) {
     <app-poster-row
       class="section"

@@ -9,7 +9,7 @@ import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from 
 import { TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { routes } from './app.routes';
-import { authInterceptor, languageInterceptor } from './core/http/interceptors';
+import { authInterceptor, languageInterceptor, refreshInterceptor } from './core/http/interceptors';
 import { provideAppTransloco } from './core/i18n/transloco.config';
 import { LanguageService } from './core/prefs/language.service';
 import { ThemeService } from './core/prefs/theme.service';
@@ -22,7 +22,7 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
     ),
-    provideHttpClient(withInterceptors([languageInterceptor, authInterceptor])),
+    provideHttpClient(withInterceptors([languageInterceptor, refreshInterceptor, authInterceptor])),
     provideAppTransloco(),
     // Resolve the language and theme, and load the translations, before the first render, so the
     // app never flashes untranslated keys.

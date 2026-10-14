@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth/auth.guard';
 
 // Every screen is lazy-loaded. Screens not built yet use the temporary UnderConstructionPage; each
 // phase of the plan replaces them with the real feature components.
@@ -33,15 +34,12 @@ export const routes: Routes = [
   },
   {
     path: 'sign-in',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'profile_sign_in' },
+    loadComponent: () => import('./features/sign-in/sign-in.page').then((m) => m.SignInPage),
   },
   {
     path: 'library',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'nav_library' },
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/library/library.page').then((m) => m.LibraryPage),
   },
   {
     path: 'friends',
@@ -69,9 +67,7 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'nav_profile' },
+    loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
   },
   {
     path: '**',

@@ -58,6 +58,8 @@
   <router-outlet />
 </main>
 
+<app-snackbar />
+
 <nav class="bottom-nav" [attr.aria-label]="'nav_home' | transloco">
   @for (item of navItems; track item.path) {
     <a

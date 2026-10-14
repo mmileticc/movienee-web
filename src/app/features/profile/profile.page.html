@@ -1,0 +1,201 @@
+<div class="page">
+  <h1 class="t-headline title">{{ 'profile_top_bar_title' | transloco }}</h1>
+
+  @if (!session.isSignedIn()) {
+    <section class="card sign-in-card">
+      <span class="icon" aria-hidden="true">account_circle</span>
+      <h2 class="t-title-lg">{{ 'profile_sign_in_required_title' | transloco }}</h2>
+      <p class="t-body-lg t-secondary">{{ 'profile_sign_in_required_message' | transloco }}</p>
+      <a class="btn primary" routerLink="/sign-in" [queryParams]="{ next: '/profile' }">
+        {{ 'profile_sign_in' | transloco }}
+      </a>
+    </section>
+  } @else if (profile.value(); as p) {
+    <section class="card header">
+      @if (!editing()) {
+        <div class="identity">
+          <span class="avatar">
+            @if (avatar(); as src) {
+              <img [src]="src" alt="" />
+            } @else {
+              <span aria-hidden="true">{{ p.username.charAt(0).toUpperCase() }}</span>
+            }
+          </span>
+          <div class="who">
+            <h2 class="t-title-lg">{{ p.username }}</h2>
+            @if (p.bio) {
+              <p class="t-body-lg t-secondary bio">{{ p.bio }}</p>
+            }
+            <p class="t-small t-muted">{{ p.email }}</p>
+          </div>
+        </div>
+        <dl class="stats">
+          <div>
+            <dt>{{ 'profile_stat_watched' | transloco }}</dt>
+            <dd>{{ p.stats.movies_watched }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'profile_stat_rated' | transloco }}</dt>
+            <dd>{{ p.stats.movies_rated }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'profile_stat_friends' | transloco }}</dt>
+            <dd>{{ p.stats.friend_count }}</dd>
+          </div>
+        </dl>
+        <button class="btn" type="button" (click)="startEditing(p)">
+          <span class="icon" aria-hidden="true">edit</span>
+          {{ 'profile_edit_section_title' | transloco }}
+        </button>
+      } @else {
+        <form class="edit" (submit)="save($event)">
+          <div class="avatar-edit">
+            <span class="avatar">
+              @if (pickedAvatar() ?? avatar(); as src) {
+                <img [src]="src" alt="" />
+              } @else {
+                <span aria-hidden="true">{{ p.username.charAt(0).toUpperCase() }}</span>
+              }
+            </span>
+            <label class="btn">
+              <span class="icon" aria-hidden="true">photo_camera</span>
+              {{ 'profile_change_avatar' | transloco }}
+              <input
+                class="sr-only"
+                type="file"
+                accept="image/*"
+                (change)="onAvatarPicked($any($event.target))"
+              />
+            </label>
+          </div>
+
+          <label class="field">
+            <span class="t-label">{{ 'profile_username_label' | transloco }}</span>
+            <input
+              class="text-input"
+              type="text"
+              autocomplete="username"
+              maxlength="40"
+              [value]="username()"
+              (input)="username.set($any($event.target).value)"
+              [attr.aria-invalid]="!!usernameProblem()"
+              aria-describedby="username-help"
+            />
+            <span id="username-help" class="help" [class.invalid]="!!usernameProblem()">
+              {{
+                usernameProblem()
+                  ? (usernameError(usernameProblem()!) | transloco)
+                  : ('profile_username_helper' | transloco)
+              }}
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="t-label">{{ 'profile_bio_label' | transloco }}</span>
+            <textarea
+              class="text-area"
+              rows="3"
+              [value]="bio()"
+              (input)="onBioInput($any($event.target).value)"
+              aria-describedby="bio-help"
+            ></textarea>
+            <span id="bio-help" class="help" [class.invalid]="bio().length >= bioMax">
+              {{
+                bio().length >= bioMax
+                  ? ('profile_bio_limit_reached' | transloco: { p1: bioMax })
+                  : ('profile_bio_helper' | transloco: { p1: bio().length })
+              }}
+            </span>
+          </label>
+
+          @if (saveError(); as e) {
+            <p class="error" role="alert">{{ errorText(e) }}</p>
+          }
+
+          <div class="buttons">
+            <button class="btn" type="button" (click)="cancelEditing()">
+              {{ 'profile_cancel_edit' | transloco }}
+            </button>
+            <button class="btn primary" type="submit" [disabled]="!canSave()">
+              {{ (saving() ? 'profile_saving' : 'profile_save_changes') | transloco }}
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+
+    @if (genres().length > 0) {
+      <section class="card">
+        <h2 class="t-title-lg section-title">{{ 'profile_taste_title' | transloco }}</h2>
+        <ul class="taste">
+          @for (g of genres(); track g.genre_id) {
+            <li>
+              <span class="t-label">{{ g.genre }}</span>
+              <span class="bar" aria-hidden="true"
+                ><span [style.width.%]="g.average_rating * 10"></span
+              ></span>
+              <span class="t-small t-secondary value">{{
+                tasteValue(g.average_rating, g.movie_count)
+              }}</span>
+            </li>
+          }
+        </ul>
+        @if (hiddenGenreCount() > 0) {
+          <button class="link" type="button" (click)="showAllGenres.set(!showAllGenres())">
+            {{
+              showAllGenres()
+                ? ('profile_taste_hide_genres' | transloco)
+                : ('profile_taste_show_more_genres' | transloco: { p1: hiddenGenreCount() })
+            }}
+          </button>
+        }
+      </section>
+    }
+  } @else if (profileError(); as e) {
+    <app-error-state [error]="e" (retry)="profile.reload()" />
+  } @else {
+    <app-spinner />
+  }
+
+  <section class="card settings">
+    <h2 class="t-title-lg section-title">{{ 'profile_settings_app_section' | transloco }}</h2>
+    <label class="setting">
+      <span>{{ 'profile_language' | transloco }}</span>
+      <select
+        class="select"
+        [value]="language.option()"
+        (change)="language.setOption($any($event.target).value)"
+      >
+        @for (option of languageOptions; track option) {
+          <option [value]="option">
+            {{
+              option === 'system'
+                ? ('profile_language_system' | transloco)
+                : option === 'sr'
+                  ? 'Srpski'
+                  : 'English'
+            }}
+          </option>
+        }
+      </select>
+    </label>
+    <label class="setting">
+      <span>{{ 'profile_dark_mode' | transloco }}</span>
+      <select
+        class="select"
+        [value]="theme.option()"
+        (change)="theme.setOption($any($event.target).value)"
+      >
+        @for (option of themeOptions; track option) {
+          <option [value]="option">{{ 'web_theme_' + option | transloco }}</option>
+        }
+      </select>
+    </label>
+    @if (session.isSignedIn()) {
+      <button class="btn sign-out" type="button" (click)="signOut()">
+        <span class="icon" aria-hidden="true">logout</span>
+        {{ 'profile_sign_out' | transloco }}
+      </button>
+    }
+  </section>
+</div>

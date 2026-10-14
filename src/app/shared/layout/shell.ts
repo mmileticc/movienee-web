@@ -5,6 +5,7 @@ import { SessionStore } from '../../core/auth/session.store';
 import { LanguageService } from '../../core/prefs/language.service';
 import { ThemeService } from '../../core/prefs/theme.service';
 import { avatarUrl } from '../../core/util/image-url';
+import { Snackbar } from '../ui/snackbar';
 
 interface NavItem {
   path: string;
@@ -19,7 +20,7 @@ interface NavItem {
  */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslocoPipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslocoPipe, Snackbar],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -9,10 +9,11 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { environment } from '../../../environments/environment';
 import { MovieApi } from '../../core/api/movie-api';
+import { SessionStore } from '../../core/auth/session.store';
 import { MovieDetail } from '../../core/models/movie';
 import { friendlyError } from '../../core/http/friendly-error';
 import { LanguageService } from '../../core/prefs/language.service';
@@ -20,9 +21,12 @@ import { formatDistance, formatRating } from '../../core/util/format';
 import { GeoPoint, currentPosition } from '../../core/util/geo';
 import { releaseYear, tmdbImage } from '../../core/util/image-url';
 import { PageTitle } from '../../core/util/page-title';
+import { LibraryStore, MovieSnapshot } from '../../core/state/library.store';
 import { ExpandableText } from '../../shared/ui/expandable-text';
 import { ImageViewerService } from '../../shared/ui/image-viewer';
 import { PosterRow } from '../../shared/ui/poster-row';
+import { RatingStars } from '../../shared/ui/rating-stars';
+import { SnackbarService } from '../../shared/ui/snackbar';
 import { ErrorState, Spinner } from '../../shared/ui/states';
 import { TrailerPlayer } from '../../shared/ui/trailer-player';
 import { CommentsSection } from './comments-section';
@@ -31,9 +35,9 @@ import { CommentsSection } from './comments-section';
 const VISIBLE_CINEMAS = 3;
 
 /**
- * Movie detail: hero with poster and ratings, genres, overview, trailer, the cinemas showing the movie
- * (sortable by distance), images, cast and public comments. Personal actions (watchlist, watched,
- * rating) arrive with the account features.
+ * Movie detail: hero with poster and ratings, the user's watchlist / watched / rating actions, genres,
+ * overview, trailer, the cinemas showing the movie (sortable by distance), images, cast and public
+ * comments. Guests trying a personal action get a "sign in" message instead.
  */
 @Component({
   selector: 'app-movie-detail',
@@ -46,6 +50,7 @@ const VISIBLE_CINEMAS = 3;
     ErrorState,
     Spinner,
     CommentsSection,
+    RatingStars,
   ],
   templateUrl: './movie-detail.page.html',
   styleUrl: './movie-detail.page.scss',
@@ -56,7 +61,11 @@ export class MovieDetailPage {
   private readonly transloco = inject(TranslocoService);
   private readonly imageViewer = inject(ImageViewerService);
   private readonly pageTitle = inject(PageTitle);
+  private readonly router = inject(Router);
+  private readonly snackbar = inject(SnackbarService);
   protected readonly language = inject(LanguageService);
+  protected readonly session = inject(SessionStore);
+  protected readonly library = inject(LibraryStore);
 
   /** Route parameter (`/movie/:id`). */
   readonly id = input.required<string>();
@@ -109,8 +118,67 @@ export class MovieDetailPage {
     (this.current()?.backdrops ?? []).map((path) => tmdbImage(path, 'w780') ?? ''),
   );
 
+  protected readonly inWatchlist = computed(() => {
+    const movie = this.current();
+    return !!movie && this.library.isInWatchlist(movie.id);
+  });
+  protected readonly watched = computed(() => {
+    const movie = this.current();
+    return movie ? this.library.historyItem(movie.id) : undefined;
+  });
+
   constructor() {
     effect(() => this.pageTitle.set(this.current()?.title));
+    effect(() => {
+      if (this.session.isSignedIn()) this.library.ensureLoaded();
+    });
+  }
+
+  protected async toggleWatchlist(): Promise<void> {
+    const movie = this.snapshot();
+    if (!movie || this.requireSignIn('movie_detail_watchlist_signin_toast')) return;
+    if (!(await this.library.toggleWatchlist(movie))) this.showError('error_server');
+  }
+
+  protected async toggleWatched(): Promise<void> {
+    const movie = this.snapshot();
+    if (!movie || this.requireSignIn('movie_detail_watched_signin_toast')) return;
+    if (!(await this.library.toggleWatched(movie))) this.showError('error_server');
+  }
+
+  protected async rate(rating: number): Promise<void> {
+    const movie = this.snapshot();
+    if (!movie || this.requireSignIn('movie_detail_rate_signin_toast')) return;
+    if (!(await this.library.setRating(movie, rating))) this.showError('library_rating_failed');
+  }
+
+  private snapshot(): MovieSnapshot | null {
+    const m = this.current();
+    if (!m) return null;
+    return {
+      id: m.id,
+      title: m.title,
+      posterPath: m.poster_path,
+      genres: m.genres,
+      releaseDate: m.release_date,
+      voteAverage: m.vote_average,
+      runtime: m.runtime,
+    };
+  }
+
+  /** For guests: shows the message with a "Sign in" action and returns true (the action stops). */
+  private requireSignIn(messageKey: string): boolean {
+    if (this.session.isSignedIn()) return false;
+    this.snackbar.show(this.transloco.translate(messageKey), {
+      actionLabel: this.transloco.translate('profile_sign_in'),
+      action: () =>
+        void this.router.navigate(['/sign-in'], { queryParams: { next: this.router.url } }),
+    });
+    return true;
+  }
+
+  private showError(key: string): void {
+    this.snackbar.show(this.transloco.translate(key));
   }
 
   protected distance(km: number | null | undefined): string | null {
