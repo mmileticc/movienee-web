@@ -47,3 +47,10 @@
   display: flex;
   margin: var(--space-5) auto 0;
 }
+
+// On phones the selects wrap to their own lines, so the divider would dangle at the end of a row.
+@media (max-width: 760px) {
+  .divider {
+    display: none;
+  }
+}

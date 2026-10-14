@@ -93,6 +93,12 @@ import { BrowsePrefsService } from '../../core/prefs/browse-prefs.service';
       padding-bottom: var(--space-1);
       scrollbar-width: thin;
     }
+    // Phones scroll the chips by swiping; the scrollbar only adds a stray line there.
+    @media (pointer: coarse) {
+      .chips {
+        scrollbar-width: none;
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

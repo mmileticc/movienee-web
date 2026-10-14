@@ -283,10 +283,29 @@
   .hero {
     padding-top: var(--space-5);
   }
+  // Title, facts and ratings sit next to the poster; the actions, the rating stars and the rest
+  // take the full width below it (10 stars do not fit next to a 120 px poster on a phone).
   .hero-inner {
-    grid-template-columns: 120px 1fr;
-    gap: var(--space-4);
+    grid-template-columns: 120px minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    gap: var(--space-2) var(--space-4);
     align-items: start;
+  }
+  .poster {
+    grid-row: 1 / span 3;
+  }
+  .headline {
+    display: contents;
+
+    > h1,
+    > .facts,
+    > .ratings {
+      grid-column: 2;
+    }
+    > :not(h1, .facts, .ratings) {
+      grid-column: 1 / -1;
+      margin-top: var(--space-2);
+    }
   }
   .headline h1 {
     font-size: 1.5rem;
