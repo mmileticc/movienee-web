@@ -1,5 +1,6 @@
 @use 'tokens';
 @use 'typography';
+@use '@angular/cdk/overlay-prebuilt.css';
 
 *,
 *::before,
@@ -156,5 +157,94 @@ p {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+// Small pill (genres, filters, trailer picker).
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+}
+
+// Section spacing inside pages.
+.section + .section {
+  margin-top: var(--space-6);
+}
+.section-title {
+  margin-bottom: var(--space-3);
+}
+
+// Responsive poster grid ("See all", search results).
+.poster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-5) var(--space-4);
+
+  @media (max-width: 760px) {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: var(--space-4) var(--space-3);
+  }
+}
+
+.list-stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+// Loading placeholder blocks.
+.skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--surface-1), var(--surface-2), var(--surface-1));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+// Full-screen image viewer (CDK dialog).
+.image-viewer-backdrop {
+  background: rgba(0, 0, 0, 0.92);
+}
+.image-viewer-panel {
+  outline: none;
+}
+
+// Text input styled like the Android search field.
+.text-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
   }
 }

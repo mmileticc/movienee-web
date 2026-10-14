@@ -1,0 +1,51 @@
+<section>
+  <h2 class="t-title-lg section-title">{{ 'movie_detail_comments_header' | transloco }}</h2>
+
+  @if (!session.isSignedIn()) {
+    <a class="btn sign-in" routerLink="/sign-in" [queryParams]="signInLink()">
+      <span class="icon" aria-hidden="true">login</span>
+      {{ 'movie_detail_comment_signin_button' | transloco }}
+    </a>
+  }
+
+  @if (comments().length === 0 && !loading() && !error()) {
+    <p class="t-body t-secondary empty">{{ 'movie_detail_comments_empty' | transloco }}</p>
+  }
+
+  <ul class="list">
+    @for (comment of comments(); track comment.id) {
+      <li class="comment">
+        <span class="avatar">
+          @if (avatar(comment); as src) {
+            <img [src]="src" alt="" loading="lazy" />
+          } @else {
+            <span aria-hidden="true">{{ comment.username.charAt(0).toUpperCase() }}</span>
+          }
+        </span>
+        <div class="body">
+          <p class="head">
+            <span class="t-title name">{{ comment.username }}</span>
+            @if (comment.is_friend) {
+              <span class="friend">{{ 'movie_detail_comment_friend_badge' | transloco }}</span>
+            }
+            <span class="t-small t-muted">{{ date(comment.created_at) }}</span>
+          </p>
+          <p class="t-body-lg text">{{ comment.body }}</p>
+          @if (comment.like_count > 0) {
+            <p class="t-small t-secondary likes">
+              <span class="icon filled" aria-hidden="true">favorite</span>{{ comment.like_count }}
+            </p>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+
+  @if (error(); as e) {
+    <app-error-state [error]="e" (retry)="load(comments().length)" />
+  } @else if (hasMore()) {
+    <button class="more" type="button" (click)="loadMore()" [disabled]="loading()">
+      {{ 'movie_detail_comments_show_more' | transloco }}
+    </button>
+  }
+</section>

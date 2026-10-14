@@ -1,0 +1,82 @@
+:host {
+  display: block;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.see-all {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.875rem;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.arrows {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+  }
+}
+
+.track {
+  --item-w: 150px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--item-w);
+  gap: var(--space-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 2px;
+  padding-bottom: var(--space-2);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > ::ng-deep * {
+    scroll-snap-align: start;
+  }
+
+  &.wide {
+    --item-w: 300px;
+  }
+}
+
+@media (max-width: 760px) {
+  .arrows {
+    display: none;
+  }
+  .see-all {
+    margin-left: auto;
+  }
+  .track {
+    --item-w: 124px;
+    gap: var(--space-3);
+    &.wide {
+      --item-w: 240px;
+    }
+  }
+}
+
+@media (hover: none) {
+  .arrows {
+    display: none;
+  }
+}

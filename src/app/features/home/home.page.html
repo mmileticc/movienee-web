@@ -1,0 +1,61 @@
+<div class="page">
+  <header class="hero">
+    <h1 class="t-display brand">movie<span>nee</span></h1>
+    <p class="t-body-lg t-secondary">{{ 'home_header_subtitle' | transloco }}</p>
+  </header>
+
+  @if (cinemaRow().length > 0) {
+    <app-poster-row
+      class="section"
+      [heading]="'home_section_now_in_cinemas' | transloco"
+      seeAllLink="/browse/now-in-cinemas"
+    >
+      @for (movie of cinemaRow(); track movie.id) {
+        <app-movie-poster-card
+          [movieId]="movie.id"
+          [title]="movie.title"
+          [posterPath]="movie.poster_path"
+          [rating]="rating(movie.vote_average)"
+          [caption]="movie.cinemas.join(', ')"
+        />
+      }
+    </app-poster-row>
+  } @else if (nowInCinemas.isLoading()) {
+    <div class="section row-skeleton" aria-hidden="true">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton"></div>
+      }
+    </div>
+  }
+
+  <section class="section">
+    <h2 class="t-title-lg section-title">{{ 'home_section_popular' | transloco }}</h2>
+    <div class="poster-grid">
+      @for (movie of popular(); track movie.id) {
+        <app-movie-poster-card
+          [movieId]="movie.id"
+          [title]="movie.title"
+          [posterPath]="movie.poster_path"
+          [rating]="rating(movie.vote_average)"
+          [caption]="year(movie.release_date)"
+        />
+      }
+    </div>
+
+    @if (popularError(); as error) {
+      <app-error-state [error]="error" (retry)="loadMorePopular()" />
+    } @else if (popularLoading()) {
+      <app-spinner />
+    } @else if (hasMorePopular()) {
+      <button class="btn load-more" type="button" (click)="loadMorePopular()">
+        {{ 'web_load_more' | transloco }}
+      </button>
+    }
+    <div
+      class="sentinel"
+      appInViewport
+      [watch]="popular().length"
+      (inViewport)="loadMorePopular()"
+    ></div>
+  </section>
+</div>

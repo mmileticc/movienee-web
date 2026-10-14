@@ -1,0 +1,67 @@
+<div class="page">
+  <header class="browse-head">
+    <a class="icon-btn" routerLink="/" [attr.aria-label]="'action_back' | transloco">
+      <span class="icon" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1 class="t-headline">{{ 'home_section_now_in_cinemas' | transloco }}</h1>
+  </header>
+
+  <app-browse-filters [genres]="genres()" [(query)]="query" [(selectedGenres)]="selectedGenres">
+    <div class="extra-filters">
+      @for (option of statuses; track option) {
+        <button
+          class="chip"
+          type="button"
+          [attr.aria-pressed]="status() === option"
+          (click)="status.set(option)"
+        >
+          {{ 'browse_status_' + option | transloco }}
+        </button>
+      }
+      <span class="divider" aria-hidden="true"></span>
+      <select
+        class="select"
+        [value]="chain() ?? ''"
+        (change)="onChainChange($any($event.target).value)"
+        [attr.aria-label]="'movie_detail_showtimes_header' | transloco"
+      >
+        <option value="">
+          {{ 'movie_detail_showtimes_header' | transloco }}: {{ 'browse_status_all' | transloco }}
+        </option>
+        @for (name of chains(); track name) {
+          <option [value]="name">{{ name }}</option>
+        }
+      </select>
+      <select
+        class="select"
+        [value]="sort()"
+        (change)="onSortChange($any($event.target).value)"
+        [attr.aria-label]="'browse_sort_content_description' | transloco"
+      >
+        @for (option of sorts; track option) {
+          <option [value]="option">{{ 'browse_sort_' + option | transloco }}</option>
+        }
+      </select>
+    </div>
+  </app-browse-filters>
+
+  @if (error(); as e) {
+    <app-error-state [error]="e" (retry)="programme.reload()" />
+  } @else if (programme.isLoading()) {
+    <app-spinner />
+  } @else if (filtered().length > 0) {
+    <app-browse-list [movies]="filtered()" [viewMode]="prefs.viewMode()" />
+  } @else {
+    <app-empty-state
+      icon="theaters"
+      [heading]="(filtersActive() ? 'browse_empty_filtered' : 'browse_cinemas_empty') | transloco"
+      [message]="filtersActive() ? ('browse_empty_filtered_hint' | transloco) : null"
+    >
+      @if (filtersActive()) {
+        <button class="btn" type="button" (click)="clearFilters()">
+          {{ 'browse_clear_search' | transloco }}
+        </button>
+      }
+    </app-empty-state>
+  }
+</div>

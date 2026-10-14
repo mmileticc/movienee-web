@@ -1,0 +1,37 @@
+.hero {
+  margin-bottom: var(--space-6);
+
+  .brand {
+    font-style: italic;
+    font-weight: 800;
+    span {
+      color: var(--accent);
+    }
+  }
+}
+
+.row-skeleton {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 150px;
+  gap: var(--space-4);
+  overflow: hidden;
+
+  .skeleton {
+    aspect-ratio: 2 / 3;
+  }
+}
+
+app-error-state,
+app-spinner {
+  margin-top: var(--space-5);
+}
+
+.sentinel {
+  height: 1px;
+}
+
+.load-more {
+  display: flex;
+  margin: var(--space-5) auto 0;
+}

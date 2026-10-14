@@ -1,0 +1,108 @@
+@if (person.value(); as p) {
+  <div class="page">
+    <header class="head">
+      <button class="photo" type="button" (click)="openPhoto()" [disabled]="!photo()">
+        @if (photo(); as src) {
+          <img [src]="src" [alt]="p.name" />
+        } @else {
+          <span class="icon" aria-hidden="true">person</span>
+        }
+      </button>
+
+      <div class="intro">
+        <h1 class="t-display">{{ p.name }}</h1>
+        @if (p.known_for_department) {
+          <p class="t-body-lg t-secondary">{{ p.known_for_department }}</p>
+        }
+
+        @if (born() || died() || p.place_of_birth) {
+          <dl class="facts">
+            @if (born(); as b) {
+              <div>
+                <dt>{{ 'actor_detail_born' | transloco }}</dt>
+                <dd>
+                  @if (b.age !== null) {
+                    {{ 'actor_detail_date_with_age' | transloco: { p1: b.date, p2: b.age } }}
+                  } @else {
+                    {{ b.date }}
+                  }
+                </dd>
+              </div>
+            }
+            @if (died(); as d) {
+              <div>
+                <dt>{{ 'actor_detail_died' | transloco }}</dt>
+                <dd>
+                  @if (d.age !== null) {
+                    {{ 'actor_detail_date_with_age' | transloco: { p1: d.date, p2: d.age } }}
+                  } @else {
+                    {{ d.date }}
+                  }
+                </dd>
+              </div>
+            }
+            @if (p.place_of_birth) {
+              <div>
+                <dt>{{ 'actor_detail_place_of_birth' | transloco }}</dt>
+                <dd>{{ p.place_of_birth }}</dd>
+              </div>
+            }
+          </dl>
+        }
+      </div>
+    </header>
+
+    <section class="section">
+      <h2 class="t-title-lg section-title">{{ 'actor_detail_biography_header' | transloco }}</h2>
+      @if (p.biography) {
+        <app-expandable-text [text]="p.biography" [lines]="6" />
+      } @else {
+        <p class="t-body t-secondary">{{ 'actor_detail_biography_empty' | transloco }}</p>
+      }
+    </section>
+
+    <section class="section">
+      <div class="filmography-head">
+        <h2 class="t-title-lg">{{ 'actor_detail_filmography_header' | transloco }}</h2>
+        <div
+          class="sorts"
+          role="group"
+          [attr.aria-label]="'browse_sort_content_description' | transloco"
+        >
+          @for (option of sorts; track option) {
+            <button
+              class="chip"
+              type="button"
+              [attr.aria-pressed]="sort() === option"
+              (click)="sort.set(option)"
+            >
+              {{ 'actor_sort_' + option | transloco }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (credits().length > 0) {
+        <div class="poster-grid">
+          @for (credit of credits(); track credit.id) {
+            <app-movie-poster-card
+              [movieId]="credit.id"
+              [title]="credit.title"
+              [posterPath]="credit.poster_path"
+              [rating]="rating(credit.vote_average)"
+              [caption]="caption(credit)"
+            />
+          }
+        </div>
+      } @else {
+        <p class="t-body t-secondary">{{ 'actor_detail_filmography_empty' | transloco }}</p>
+      }
+    </section>
+  </div>
+} @else if (error(); as e) {
+  <div class="page">
+    <app-error-state [error]="e" (retry)="person.reload()" />
+  </div>
+} @else {
+  <app-spinner />
+}

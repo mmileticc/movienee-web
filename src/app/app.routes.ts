@@ -6,38 +6,30 @@ const underConstruction = () =>
   import('./features/placeholder/under-construction.page').then((m) => m.UnderConstructionPage);
 
 export const routes: Routes = [
-  { path: '', title: 'Movienee', loadComponent: underConstruction, data: { titleKey: 'nav_home' } },
+  { path: '', loadComponent: () => import('./features/home/home.page').then((m) => m.HomePage) },
   {
     path: 'search',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'nav_search' },
+    loadComponent: () => import('./features/search/search.page').then((m) => m.SearchPage),
   },
   {
     path: 'movie/:id',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'app_name' },
+    loadComponent: () =>
+      import('./features/movie/movie-detail.page').then((m) => m.MovieDetailPage),
   },
   // Short alias used by shared links (https://<backend>/m/{tmdbId}).
   { path: 'm/:id', redirectTo: 'movie/:id' },
   {
     path: 'person/:id',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'app_name' },
+    loadComponent: () => import('./features/person/person.page').then((m) => m.PersonPage),
   },
   {
     path: 'browse/suggested',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'home_section_personalized' },
+    loadComponent: () => import('./features/browse/suggested.page').then((m) => m.SuggestedPage),
   },
   {
     path: 'browse/now-in-cinemas',
-    title: 'Movienee',
-    loadComponent: underConstruction,
-    data: { titleKey: 'home_section_now_in_cinemas' },
+    loadComponent: () =>
+      import('./features/browse/now-in-cinemas.page').then((m) => m.NowInCinemasPage),
   },
   {
     path: 'sign-in',

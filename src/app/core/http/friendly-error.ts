@@ -17,7 +17,9 @@ export interface FriendlyError {
  * - other 4xx -> the backend's `{ error }` message (already localized via Accept-Language);
  * - 5xx and anything else -> `error_server` / the caller's fallback key.
  */
-export function friendlyError(error: unknown, fallbackKey: string): FriendlyError {
+export function friendlyError(raw: unknown, fallbackKey: string): FriendlyError {
+  // Angular resources wrap non-Error values (an HttpErrorResponse is not an Error) in `cause`.
+  const error = raw instanceof HttpErrorResponse ? raw : (raw as { cause?: unknown } | null)?.cause;
   if (!(error instanceof HttpErrorResponse)) return { key: fallbackKey, soft: false };
 
   const serverMessage =

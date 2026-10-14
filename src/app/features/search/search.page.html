@@ -1,0 +1,146 @@
+<div class="page">
+  <h1 class="t-headline title">{{ 'search_top_bar_title' | transloco }}</h1>
+
+  <div class="modes" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="mode() === 'all'"
+      (click)="setMode('all')"
+    >
+      {{ 'search_mode_all' | transloco }}
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="mode() === 'cinemas'"
+      (click)="setMode('cinemas')"
+    >
+      {{ 'search_mode_cinemas' | transloco }}
+    </button>
+  </div>
+
+  <form class="search-box" role="search" (submit)="onSubmit($event)">
+    <span class="icon lead" aria-hidden="true">search</span>
+    <input
+      class="text-input"
+      type="search"
+      enterkeyhint="search"
+      autocomplete="off"
+      [value]="query()"
+      (input)="onInput($any($event.target).value)"
+      [placeholder]="
+        (mode() === 'all' ? 'search_input_placeholder' : 'search_input_placeholder_cinemas')
+          | transloco
+      "
+      [attr.aria-label]="'search_submit_content_description' | transloco"
+    />
+    @if (searching()) {
+      <span class="busy" aria-hidden="true"></span>
+    } @else if (query()) {
+      <button
+        class="icon-btn clear"
+        type="button"
+        (click)="clear()"
+        [attr.aria-label]="'search_clear_content_description' | transloco"
+      >
+        <span class="icon" aria-hidden="true">close</span>
+      </button>
+    }
+    <button
+      class="icon-btn submit"
+      type="submit"
+      [attr.aria-label]="'search_submit_content_description' | transloco"
+    >
+      <span class="icon" aria-hidden="true">send</span>
+    </button>
+  </form>
+
+  @if (mode() === 'cinemas') {
+    <p class="t-body t-secondary hint">{{ 'search_cinemas_live_hint' | transloco }}</p>
+  }
+
+  @if (error(); as e) {
+    <app-error-state [error]="e" (retry)="retry()" />
+  } @else if (mode() === 'all') {
+    @if (results(); as movies) {
+      @if (movies.length > 0) {
+        <h2 class="t-title-lg section-title">{{ 'search_text_results_header' | transloco }}</h2>
+        <div class="poster-grid">
+          @for (movie of movies; track movie.id) {
+            <app-movie-poster-card
+              [movieId]="movie.id"
+              [title]="movie.title"
+              [posterPath]="movie.poster_path"
+              [rating]="rating(movie.vote_average)"
+              [caption]="year(movie.release_date)"
+              (opened)="onResultOpened()"
+            />
+          }
+        </div>
+      } @else if (!searching()) {
+        <app-empty-state
+          icon="search_off"
+          [heading]="'search_no_results_title' | transloco: { p1: query() }"
+          [message]="'search_no_results_message' | transloco"
+        />
+      }
+    } @else if (recent.queries().length > 0) {
+      <section class="recent">
+        <div class="recent-head">
+          <h2 class="t-title">{{ 'search_recent_title' | transloco }}</h2>
+          <button class="link" type="button" (click)="recent.clear()">
+            {{ 'search_recent_clear_all' | transloco }}
+          </button>
+        </div>
+        <ul class="recent-list">
+          @for (q of recent.queries(); track q) {
+            <li class="chip recent-chip">
+              <button type="button" class="recent-query" (click)="useRecent(q)">
+                <span class="icon" aria-hidden="true">history</span>{{ q }}
+              </button>
+              <button
+                type="button"
+                class="recent-remove"
+                (click)="recent.remove(q)"
+                [attr.aria-label]="'search_recent_remove_content_description' | transloco"
+              >
+                <span class="icon" aria-hidden="true">close</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    } @else {
+      <app-empty-state
+        icon="movie_filter"
+        [heading]="'search_empty_state_title' | transloco"
+        [message]="'search_empty_state_message' | transloco"
+      />
+    }
+  } @else {
+    @if (programmeError(); as e) {
+      <app-error-state [error]="e" (retry)="retry()" />
+    } @else if (programme() === null) {
+      <app-spinner />
+    } @else if (cinemaList().length > 0) {
+      <div class="list-stack">
+        @for (movie of cinemaList(); track movie.id) {
+          <app-movie-list-row
+            [movieId]="movie.id"
+            [title]="movie.title"
+            [posterPath]="movie.poster_path"
+            [meta]="cinemaMeta(movie)"
+            [description]="movie.overview"
+          />
+        }
+      </div>
+    } @else if (!searching()) {
+      <app-empty-state
+        icon="theaters"
+        [heading]="'search_cinemas_empty_title' | transloco"
+        [message]="'search_cinemas_no_results' | transloco"
+      />
+    }
+  }
+</div>

@@ -1,0 +1,37 @@
+<div class="page">
+  <header class="browse-head">
+    <a class="icon-btn" routerLink="/" [attr.aria-label]="'action_back' | transloco">
+      <span class="icon" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1 class="t-headline">{{ 'home_section_personalized' | transloco }}</h1>
+  </header>
+
+  <app-browse-filters [genres]="genres()" [(query)]="query" [(selectedGenres)]="selectedGenres" />
+
+  @if (filtered().length > 0) {
+    <app-browse-list [movies]="filtered()" [viewMode]="prefs.viewMode()" />
+  } @else if (!loading() && !error()) {
+    <app-empty-state
+      icon="filter_alt_off"
+      [heading]="(filtersActive() ? 'browse_empty_filtered' : 'browse_suggested_empty') | transloco"
+      [message]="filtersActive() ? ('browse_empty_filtered_hint' | transloco) : null"
+    >
+      @if (filtersActive()) {
+        <button class="btn" type="button" (click)="clearFilters()">
+          {{ 'browse_clear_search' | transloco }}
+        </button>
+      }
+    </app-empty-state>
+  }
+
+  @if (error(); as e) {
+    <app-error-state class="after" [error]="e" (retry)="loadMore()" />
+  } @else if (loading()) {
+    <app-spinner />
+  } @else if (hasMore()) {
+    <button class="btn load-more" type="button" (click)="loadMore()">
+      {{ 'web_load_more' | transloco }}
+    </button>
+  }
+  <div class="sentinel" appInViewport [watch]="movies().length" (inViewport)="loadMore()"></div>
+</div>
