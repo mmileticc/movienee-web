@@ -20,7 +20,12 @@
     </button>
   </div>
 
-  <form class="search-box" role="search" (submit)="onSubmit($event)">
+  <form
+    class="search-box"
+    role="search"
+    [class.with-image]="mode() === 'all'"
+    (submit)="onSubmit($event)"
+  >
     <span class="icon lead" aria-hidden="true">search</span>
     <input
       class="text-input"
@@ -47,6 +52,18 @@
         <span class="icon" aria-hidden="true">close</span>
       </button>
     }
+    @if (mode() === 'all') {
+      <button
+        class="icon-btn image"
+        type="button"
+        [disabled]="analyzing()"
+        (click)="pickImage(fileInput)"
+        [attr.aria-label]="'search_image_attach_content_description' | transloco"
+        [title]="'search_image_attach_content_description' | transloco"
+      >
+        <span class="icon" aria-hidden="true">image_search</span>
+      </button>
+    }
     <button
       class="icon-btn submit"
       type="submit"
@@ -55,6 +72,34 @@
       <span class="icon" aria-hidden="true">send</span>
     </button>
   </form>
+  <input #fileInput type="file" accept="image/*" hidden (change)="onImagePicked($event)" />
+
+  @if (imagePreview(); as src) {
+    <div class="image-preview">
+      <img [src]="src" alt="" width="56" height="56" />
+      <p class="t-body" role="status">
+        @if (analyzing()) {
+          <span class="busy-inline" aria-hidden="true"></span>
+          {{ 'search_image_analyzing' | transloco }}
+        } @else {
+          {{ 'search_image_preview_ready' | transloco }}
+        }
+      </p>
+      <button
+        class="icon-btn"
+        type="button"
+        (click)="clearImage()"
+        [attr.aria-label]="'search_image_remove_content_description' | transloco"
+      >
+        <span class="icon" aria-hidden="true">close</span>
+      </button>
+    </div>
+  }
+  @if (visionError(); as e) {
+    <app-error-state [error]="e" (retry)="retryImage()" />
+  } @else if (visionResult(); as response) {
+    <app-vision-results [response]="response" (cleared)="clearImage()" />
+  }
 
   @if (mode() === 'cinemas') {
     <p class="t-body t-secondary hint">{{ 'search_cinemas_live_hint' | transloco }}</p>
@@ -85,6 +130,8 @@
           [message]="'search_no_results_message' | transloco"
         />
       }
+    } @else if (imageActive()) {
+      <!-- The image search result stands on its own; no "start searching" hints below it. -->
     } @else if (recent.queries().length > 0) {
       <section class="recent">
         <div class="recent-head">
