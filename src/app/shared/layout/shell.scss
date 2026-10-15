@@ -109,6 +109,36 @@ main {
   outline: none;
 }
 
+.site-footer {
+  display: grid;
+  gap: var(--space-2);
+  width: min(var(--content-max), 100% - 2 * var(--space-4));
+  margin: var(--space-7) auto 0;
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--border);
+
+  .tmdb {
+    justify-self: start;
+    img {
+      display: block;
+      height: 14px;
+      width: auto;
+    }
+  }
+  p {
+    margin: 0;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    a {
+      color: var(--text-2);
+      text-decoration: underline;
+    }
+  }
+}
+
 .bottom-nav {
   display: none;
 }
@@ -119,8 +149,8 @@ main {
     display: none;
   }
 
-  main {
-    padding-bottom: calc(var(--bottombar-h) + env(safe-area-inset-bottom));
+  .site-footer {
+    margin-bottom: calc(var(--bottombar-h) + env(safe-area-inset-bottom));
   }
 
   .bottom-nav {

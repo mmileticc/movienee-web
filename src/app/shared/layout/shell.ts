@@ -51,6 +51,8 @@ export class Shell {
     this.language.language() === 'sr' ? 'EN' : 'SR',
   );
 
+  protected readonly year = new Date().getFullYear();
+
   protected readonly avatar = computed(() => avatarUrl(this.session.user()?.avatarUrl));
 
   protected readonly themeIcon = computed(

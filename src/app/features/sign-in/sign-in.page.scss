@@ -108,4 +108,8 @@
 
 .terms {
   margin-top: var(--space-2);
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
 }

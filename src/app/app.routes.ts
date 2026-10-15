@@ -65,6 +65,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
   },
   {
+    path: 'privacy',
+    loadComponent: () => import('./features/privacy/privacy.page').then((m) => m.PrivacyPage),
+  },
+  {
     path: '**',
     title: 'Movienee',
     loadComponent: () => import('./features/not-found/not-found.page').then((m) => m.NotFoundPage),

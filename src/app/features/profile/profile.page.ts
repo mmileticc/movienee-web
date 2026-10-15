@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { UserApi } from '../../core/api/user-api';
 import { AuthService } from '../../core/auth/auth.service';
 import { SessionStore } from '../../core/auth/session.store';
@@ -168,6 +168,34 @@ export class ProfilePage {
   /** The browser's own install dialog (the button is shown only where it is available). */
   protected install(): void {
     void this.pwa.install();
+  }
+
+  protected readonly deleting = signal(false);
+
+  /**
+   * Deletes the account after an explicit confirmation. Only after the server confirmed is the
+   * session cleared; a failure leaves the user signed in with a message.
+   */
+  protected async deleteAccount(): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: this.transloco.translate('web_delete_account_title'),
+      message: this.transloco.translate('web_delete_account_message'),
+      confirmLabel: this.transloco.translate('web_delete_account'),
+      cancelLabel: this.transloco.translate('profile_cancel_edit'),
+      destructive: true,
+    });
+    if (!confirmed) return;
+    this.deleting.set(true);
+    try {
+      await firstValueFrom(this.userApi.deleteAccount(), { defaultValue: undefined });
+    } catch {
+      this.deleting.set(false);
+      this.snackbar.show(this.transloco.translate('web_delete_account_failed'));
+      return;
+    }
+    await this.auth.signOut().catch(() => undefined);
+    this.snackbar.show(this.transloco.translate('web_account_deleted'));
+    void this.router.navigateByUrl('/');
   }
 
   protected async signOut(): Promise<void> {

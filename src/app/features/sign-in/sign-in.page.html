@@ -40,6 +40,10 @@
       {{ (busy() ? 'sign_in_loading' : 'sign_in_google_button') | transloco }}
     </button>
 
-    <p class="t-small t-muted terms">{{ 'sign_in_terms' | transloco }}</p>
+    <p class="t-small t-muted terms">
+      {{ 'web_sign_in_terms' | transloco }}
+      <a routerLink="/privacy">{{ 'web_sign_in_terms_link' | transloco }}</a
+      >.
+    </p>
   </div>
 </section>

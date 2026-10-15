@@ -24,6 +24,11 @@ export class UserApi extends UserScopedApi {
     return this.http.get<UserProfile>(this.me());
   }
 
+  /** Deletes the account with all its data (and its Firebase sign-in) on the server. */
+  deleteAccount(): Observable<void> {
+    return this.http.delete<void>(this.me());
+  }
+
   updateProfile(body: UpdateProfileRequest): Observable<UserProfile> {
     return this.http.put<UserProfile>(this.me('/profile'), body);
   }

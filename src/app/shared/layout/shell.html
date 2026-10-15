@@ -73,6 +73,21 @@
   <router-outlet />
 </main>
 
+<!-- TMDB's terms require this attribution (logo + notice) wherever their data is shown. -->
+<footer class="site-footer">
+  <a class="tmdb" href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
+    <img src="tmdb-logo.svg" alt="TMDB" width="110" height="14" loading="lazy" />
+  </a>
+  <p class="t-small t-muted">
+    {{ 'web_tmdb_attribution' | transloco }} {{ 'web_cinema_data_note' | transloco }}
+  </p>
+  <p class="t-small links">
+    <a routerLink="/privacy">{{ 'web_privacy_title' | transloco }}</a>
+    <span aria-hidden="true">·</span>
+    <span class="t-muted">© {{ year }} Movienee</span>
+  </p>
+</footer>
+
 <app-snackbar />
 
 <nav class="bottom-nav" [attr.aria-label]="'nav_home' | transloco">

@@ -205,6 +205,16 @@
         <span class="icon" aria-hidden="true">logout</span>
         {{ 'profile_sign_out' | transloco }}
       </button>
+      <button
+        class="btn delete-account"
+        type="button"
+        [disabled]="deleting()"
+        (click)="deleteAccount()"
+      >
+        <span class="icon" aria-hidden="true">delete</span>
+        {{ 'web_delete_account' | transloco }}
+      </button>
     }
+    <a class="privacy-link t-small" routerLink="/privacy">{{ 'web_privacy_title' | transloco }}</a>
   </section>
 </div>
