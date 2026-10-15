@@ -15,12 +15,20 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { environment } from '../../../environments/environment';
 import { MovieApi } from '../../core/api/movie-api';
 import { SessionStore } from '../../core/auth/session.store';
-import { MovieDetail } from '../../core/models/movie';
+import { MovieDetail, Showtime, ShowtimeSlot } from '../../core/models/movie';
 import { friendlyError } from '../../core/http/friendly-error';
 import { LanguageService } from '../../core/prefs/language.service';
 import { formatDistance, formatRating } from '../../core/util/format';
 import { GeoPoint, currentPosition } from '../../core/util/geo';
 import { releaseYear, tmdbImage, tmdbSrcset } from '../../core/util/image-url';
+import {
+  dayLabel,
+  hallLabel,
+  safeLink,
+  showtimeDays,
+  timeOf,
+  timesOnDay,
+} from '../../core/util/showtimes';
 import { PageTitle } from '../../core/util/page-title';
 import { LibraryStore, MovieSnapshot } from '../../core/state/library.store';
 import { ExpandableText } from '../../shared/ui/expandable-text';
@@ -118,9 +126,25 @@ export class MovieDetailPage {
   protected readonly imdbRating = computed(() =>
     formatRating(this.current()?.imdb_rating, this.language.language()),
   );
+  /** Days with at least one screening; the chips above the cinemas. */
+  protected readonly days = computed(() => showtimeDays(this.current()?.showtimes ?? []));
+  /** The chosen day: the first one with screenings, kept while it still exists after a reload. */
+  protected readonly selectedDay = linkedSignal<string[], string | null>({
+    source: this.days,
+    computation: (days, previous) =>
+      previous?.value && days.includes(previous.value) ? previous.value : (days[0] ?? null),
+  });
+  /** Cinemas with screenings on the chosen day first, otherwise in the server's order (distance). */
   protected readonly cinemas = computed(() => {
+    const day = this.selectedDay();
     const all = this.current()?.showtimes ?? [];
-    return this.showAllCinemas() ? all : all.slice(0, VISIBLE_CINEMAS);
+    const ordered = day
+      ? [
+          ...all.filter((c) => timesOnDay(c, day).length > 0),
+          ...all.filter((c) => timesOnDay(c, day).length === 0),
+        ]
+      : all;
+    return this.showAllCinemas() ? ordered : ordered.slice(0, VISIBLE_CINEMAS);
   });
   protected readonly hiddenCinemaCount = computed(
     () => (this.current()?.showtimes.length ?? 0) - VISIBLE_CINEMAS,
@@ -207,6 +231,36 @@ export class MovieDetailPage {
 
   private showError(key: string): void {
     this.snackbar.show(this.transloco.translate(key));
+  }
+
+  protected dayLabel(day: string): string {
+    return dayLabel(day, this.language.language(), (key) => this.transloco.translate(key));
+  }
+
+  protected timesOnDay(cinema: Showtime): ShowtimeSlot[] {
+    return timesOnDay(cinema, this.selectedDay());
+  }
+
+  protected timeOf(slot: ShowtimeSlot): string {
+    return timeOf(slot);
+  }
+
+  /** "3D · Sala 2" under the time, or null. */
+  protected slotDetails(slot: ShowtimeSlot): string | null {
+    const hall = hallLabel(slot.hall, (key, params) => this.transloco.translate(key, params));
+    return [slot.format, hall].filter(Boolean).join(' · ') || null;
+  }
+
+  /** The screening's own ticket page, else the cinema's page for the movie. */
+  protected slotLink(slot: ShowtimeSlot, cinema: Showtime): string | null {
+    return safeLink(slot.booking_url) ?? safeLink(cinema.booking_url);
+  }
+
+  protected slotLabel(slot: ShowtimeSlot, cinema: Showtime): string {
+    return this.transloco.translate('showtimes_buy_content_description', {
+      p1: this.timeOf(slot),
+      p2: cinema.cinema_location,
+    });
   }
 
   protected distance(km: number | null | undefined): string | null {

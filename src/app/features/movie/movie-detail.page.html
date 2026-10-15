@@ -158,6 +158,20 @@
           @if (locationDenied()) {
             <p class="t-body t-secondary hint">{{ 'web_location_unavailable' | transloco }}</p>
           }
+          @if (days().length > 0) {
+            <div class="days" role="group" [attr.aria-label]="'showtimes_days_label' | transloco">
+              @for (day of days(); track day) {
+                <button
+                  class="chip"
+                  type="button"
+                  [attr.aria-pressed]="selectedDay() === day"
+                  (click)="selectedDay.set(day)"
+                >
+                  {{ dayLabel(day) }}
+                </button>
+              }
+            </div>
+          }
           <ul class="cinemas">
             @for (show of cinemas(); track show.cinema_location + show.booking_url) {
               <li class="cinema">
@@ -174,14 +188,36 @@
                 @if (show.is_upcoming) {
                   <span class="chip upcoming">{{ 'movie_detail_upcoming_badge' | transloco }}</span>
                 }
-                <a
-                  class="btn small primary"
-                  [href]="show.booking_url"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  {{ 'movie_detail_open_link' | transloco }}
-                </a>
+                @if (!show.times?.length) {
+                  <!-- No times known (yet) for this cinema: its page for the movie, as before. -->
+                  <a
+                    class="btn small primary"
+                    [href]="show.booking_url"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    {{ 'movie_detail_open_link' | transloco }}
+                  </a>
+                } @else {
+                  <div class="times">
+                    @for (slot of timesOnDay(show); track $index) {
+                      <a
+                        class="time"
+                        [href]="slotLink(slot, show)"
+                        target="_blank"
+                        rel="noopener"
+                        [attr.aria-label]="slotLabel(slot, show)"
+                      >
+                        <span class="clock">{{ timeOf(slot) }}</span>
+                        @if (slotDetails(slot); as details) {
+                          <span class="details">{{ details }}</span>
+                        }
+                      </a>
+                    } @empty {
+                      <span class="t-small t-muted">{{ 'showtimes_none_on_day' | transloco }}</span>
+                    }
+                  </div>
+                }
               </li>
             }
           </ul>

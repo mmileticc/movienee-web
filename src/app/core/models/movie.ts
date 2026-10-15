@@ -48,6 +48,18 @@ export interface Showtime {
   longitude?: number | null;
   distance_km?: number | null;
   is_upcoming: boolean;
+  /** Screenings of the next days at this cinema, earliest first; missing from older backends. */
+  times?: ShowtimeSlot[];
+}
+
+/** One screening. `starts_at` is the local time in Belgrade, e.g. "2026-10-15T19:00". */
+export interface ShowtimeSlot {
+  starts_at: string;
+  hall?: string | null;
+  format?: string | null;
+  /** Ticket page of exactly this screening. */
+  booking_url?: string | null;
+  price_rsd?: number | null;
 }
 
 export interface MovieDetail {
