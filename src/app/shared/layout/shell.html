@@ -74,18 +74,17 @@
 </main>
 
 <!-- TMDB's terms require this attribution (logo + notice) wherever their data is shown. -->
+<!-- Only what TMDB's terms require (logo + notice), kept small; plus the privacy link. -->
 <footer class="site-footer">
   <a class="tmdb" href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
-    <img src="tmdb-logo.svg" alt="TMDB" width="110" height="14" loading="lazy" />
+    <img src="tmdb-logo.svg" alt="TMDB" width="79" height="10" loading="lazy" />
   </a>
-  <p class="t-small t-muted">
-    {{ 'web_tmdb_attribution' | transloco }} {{ 'web_cinema_data_note' | transloco }}
-  </p>
-  <p class="t-small links">
+  <span class="note">{{ 'web_tmdb_attribution' | transloco }}</span>
+  <span class="links">
     <a routerLink="/privacy">{{ 'web_privacy_title' | transloco }}</a>
     <span aria-hidden="true">·</span>
-    <span class="t-muted">© {{ year }} Movienee</span>
-  </p>
+    <span>© {{ year }} Movienee</span>
+  </span>
 </footer>
 
 <app-snackbar />
