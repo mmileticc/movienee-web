@@ -27,6 +27,15 @@ describe('friendlyError', () => {
     });
   });
 
+  it('shows the reason of a 429 (e.g. the daily AI search limit) calmly', () => {
+    expect(
+      friendlyError(httpError(429, { error: "AI search has reached today's limit." }), 'x'),
+    ).toEqual({
+      message: "AI search has reached today's limit.",
+      soft: true,
+    });
+  });
+
   it('marks 503 as a soft error', () => {
     expect(friendlyError(httpError(503, { error: 'Gemini is busy' }), 'x')).toEqual({
       message: 'Gemini is busy',

@@ -12,7 +12,9 @@ export interface FriendlyError {
  * Turns any error into something safe to show (the web counterpart of Android's
  * util/FriendlyError.kt). Raw technical text never reaches the UI:
  * - no connection / CORS / timeout -> `error_network`;
- * - 401/403 -> `error_forbidden`, 404 -> `error_not_found`, 429 -> `error_too_many_requests`;
+ * - 401/403 -> `error_forbidden`, 404 -> `error_not_found`;
+ * - 429 -> the backend's message (e.g. the daily AI search limit) as a soft error, otherwise
+ *   `error_too_many_requests`;
  * - 503 -> the backend's message as a soft error (e.g. Gemini overload);
  * - other 4xx -> the backend's `{ error }` message (already localized via Accept-Language);
  * - 5xx and anything else -> `error_server` / the caller's fallback key.
@@ -32,7 +34,9 @@ export function friendlyError(raw: unknown, fallbackKey: string): FriendlyError 
     case error.status === 404:
       return { key: 'error_not_found', soft: false };
     case error.status === 429:
-      return { key: 'error_too_many_requests', soft: false };
+      return serverMessage
+        ? { message: serverMessage, soft: true }
+        : { key: 'error_too_many_requests', soft: true };
     case error.status === 503:
       return serverMessage
         ? { message: serverMessage, soft: true }
