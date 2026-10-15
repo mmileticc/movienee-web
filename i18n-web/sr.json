@@ -11,5 +11,9 @@
   "web_share_failed": "Deljenje nije uspelo",
   "web_location_unavailable": "Lokacija nije dostupna - dozvoli pristup lokaciji u pregledaču da bismo sortirali bioskope po udaljenosti.",
   "web_load_more": "Učitaj još",
-  "web_movie_night": "Movie Night"
+  "web_movie_night": "Movie Night",
+  "web_update_available": "Dostupna je nova verzija Movienee-a.",
+  "web_update_reload": "Osveži",
+  "web_install_app": "Instaliraj",
+  "web_install_app_hint": "Movienee kao aplikacija na ovom uređaju"
 }

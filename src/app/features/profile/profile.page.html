@@ -191,6 +191,15 @@
         }
       </select>
     </label>
+    @if (pwa.canInstall()) {
+      <div class="setting">
+        <span>{{ 'web_install_app_hint' | transloco }}</span>
+        <button class="btn" type="button" (click)="install()">
+          <span class="icon" aria-hidden="true">install_mobile</span>
+          {{ 'web_install_app' | transloco }}
+        </button>
+      </div>
+    }
     @if (session.isSignedIn()) {
       <button class="btn sign-out" type="button" (click)="signOut()">
         <span class="icon" aria-hidden="true">logout</span>

@@ -10,6 +10,7 @@ import { FriendlyError, friendlyError } from '../../core/http/friendly-error';
 import { UserProfile } from '../../core/models/user';
 import { LanguageOption, LanguageService } from '../../core/prefs/language.service';
 import { ThemeOption, ThemeService } from '../../core/prefs/theme.service';
+import { PwaService } from '../../core/pwa/pwa.service';
 import { formatRating } from '../../core/util/format';
 import { compressImage, toDataUri } from '../../core/util/image-compress';
 import { avatarUrl } from '../../core/util/image-url';
@@ -46,6 +47,7 @@ export class ProfilePage {
   protected readonly session = inject(SessionStore);
   protected readonly language = inject(LanguageService);
   protected readonly theme = inject(ThemeService);
+  protected readonly pwa = inject(PwaService);
 
   protected readonly bioMax = BIO_MAX_LENGTH;
   protected readonly languageOptions: LanguageOption[] = ['system', 'sr', 'en'];
@@ -161,6 +163,11 @@ export class ProfilePage {
           this.saving.set(false);
         },
       });
+  }
+
+  /** The browser's own install dialog (the button is shown only where it is available). */
+  protected install(): void {
+    void this.pwa.install();
   }
 
   protected async signOut(): Promise<void> {

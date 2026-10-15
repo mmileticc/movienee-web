@@ -11,5 +11,9 @@
   "web_share_failed": "Sharing failed",
   "web_location_unavailable": "Location isn't available - allow location access in your browser to sort cinemas by distance.",
   "web_load_more": "Load more",
-  "web_movie_night": "Movie Night"
+  "web_movie_night": "Movie Night",
+  "web_update_available": "A new version of Movienee is available.",
+  "web_update_reload": "Reload",
+  "web_install_app": "Install",
+  "web_install_app_hint": "Movienee as an app on this device"
 }

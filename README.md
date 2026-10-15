@@ -33,6 +33,9 @@ an account, its library and its friends are shared between the two.
   this", notifications with unread badges.
 - **Everywhere** - Serbian and English, dark / light / system theme, works from 375 px phones to
   desktop, shareable links (`/m/{id}` previews in messengers and opens the Android app if installed).
+- **Installable (PWA)** - add it to the home screen or desktop; it opens in its own window, starts
+  instantly from the cache, shows the app (not a browser error) without a connection, and offers a
+  reload when a new version is deployed.
 
 ## Stack
 
@@ -54,6 +57,9 @@ ESLint · Prettier · GitHub Actions
 - **Performance** - lazy-loaded screens, responsive TMDB images (`srcset`), priority loading for the
   first posters, and an icon font cut down to the 54 icons the app uses (1.4 MB -> 22 kB;
   `tools/check-icons.mjs` fails the lint when an icon is missing from the list).
+- **Service worker** - caches only the app itself (code, translations, icons, fonts), never the
+  backend's data; content-hashed files are cached forever, the worker files never
+  (`ngsw-config.json`, `firebase.json`).
 - **Accessibility** - Lighthouse accessibility 100: keyboard navigation, visible focus, WCAG AA
   contrast in both themes, labelled controls, rating stars as a slider.
 - **One source of texts** - translations are generated from the Android app's `strings.xml`, so

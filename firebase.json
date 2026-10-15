@@ -2,10 +2,7 @@
   "hosting": {
     "site": "movienee",
     "public": "dist/movienee-web/browser",
-    "ignore": [
-      "firebase.json",
-      "**/.*"
-    ],
+    "ignore": ["firebase.json", "**/.*"],
     "rewrites": [
       {
         "source": "**",
@@ -18,7 +15,7 @@
         "headers": [
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; script-src 'self' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://image.tmdb.org https://i.ytimg.com https://*.googleusercontent.com https://movielensbackendktor.onrender.com; connect-src 'self' https://movielensbackendktor.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://apis.google.com; frame-src https://www.youtube-nocookie.com https://movielens-90309.firebaseapp.com https://accounts.google.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+            "value": "default-src 'self'; script-src 'self' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://image.tmdb.org https://i.ytimg.com https://*.googleusercontent.com https://movielensbackendktor.onrender.com; connect-src 'self' https://movielensbackendktor.onrender.com https://image.tmdb.org https://i.ytimg.com https://*.googleusercontent.com https://fonts.googleapis.com https://fonts.gstatic.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://apis.google.com; frame-src https://www.youtube-nocookie.com https://movielens-90309.firebaseapp.com https://accounts.google.com; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
           },
           {
             "key": "X-Frame-Options",
@@ -39,7 +36,7 @@
         ]
       },
       {
-        "source": "**/*.@(js|css|woff2)",
+        "source": "**/@(main|chunk|polyfills|styles)-*.@(js|css)",
         "headers": [
           {
             "key": "Cache-Control",
@@ -58,6 +55,15 @@
       },
       {
         "source": "/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/@(ngsw-worker.js|ngsw.json|safety-worker.js|worker-basic.min.js|manifest.webmanifest|theme-init.js)",
         "headers": [
           {
             "key": "Cache-Control",

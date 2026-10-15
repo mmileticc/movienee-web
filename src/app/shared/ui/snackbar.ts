@@ -7,6 +7,8 @@ interface SnackbarMessage {
   action?: () => void;
   /** Called when the message disappears without the action being used (e.g. commit a removal). */
   onDismiss?: () => void;
+  /** Stays until the action is used or another message replaces it (e.g. "New version"). */
+  persistent?: boolean;
 }
 
 const DURATION_MS = 5000;
@@ -24,7 +26,7 @@ export class SnackbarService {
   show(text: string, options: Omit<SnackbarMessage, 'id' | 'text'> = {}): void {
     this.dismiss();
     this.current.set({ id: this.nextId++, text, ...options });
-    this.timer = setTimeout(() => this.dismiss(), DURATION_MS);
+    if (!options.persistent) this.timer = setTimeout(() => this.dismiss(), DURATION_MS);
   }
 
   /** Runs the action and closes the message without calling onDismiss. */

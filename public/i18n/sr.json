@@ -357,6 +357,8 @@
   "state_error_title": "Nešto nije u redu",
   "state_retry": "Pokušaj ponovo",
   "web_back_home": "Nazad na početnu",
+  "web_install_app": "Instaliraj",
+  "web_install_app_hint": "Movienee kao aplikacija na ovom uređaju",
   "web_language_toggle": "Promeni jezik",
   "web_link_copied": "Link je kopiran",
   "web_load_more": "Učitaj još",
@@ -368,5 +370,7 @@
   "web_skip_to_content": "Preskoči na sadržaj",
   "web_theme_dark": "Tamna tema",
   "web_theme_light": "Svetla tema",
-  "web_theme_system": "Tema sistema"
+  "web_theme_system": "Tema sistema",
+  "web_update_available": "Dostupna je nova verzija Movienee-a.",
+  "web_update_reload": "Osveži"
 }

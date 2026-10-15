@@ -357,6 +357,8 @@
   "state_error_title": "Something went wrong",
   "state_retry": "Try again",
   "web_back_home": "Back to home",
+  "web_install_app": "Install",
+  "web_install_app_hint": "Movienee as an app on this device",
   "web_language_toggle": "Change language",
   "web_link_copied": "Link copied",
   "web_load_more": "Load more",
@@ -368,5 +370,7 @@
   "web_skip_to_content": "Skip to content",
   "web_theme_dark": "Dark theme",
   "web_theme_light": "Light theme",
-  "web_theme_system": "System theme"
+  "web_theme_system": "System theme",
+  "web_update_available": "A new version of Movienee is available.",
+  "web_update_reload": "Reload"
 }
