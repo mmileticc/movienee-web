@@ -2,12 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import {
+  FeedResponse,
   FriendAction,
   FriendActivity,
   FriendActivityResponse,
   FriendInfo,
   FriendProfileResponse,
   FriendsResponse,
+  InviteAccepted,
+  Inviter,
+  MyInvite,
   MovieNightResponse,
   NotificationItem,
   NotificationsResponse,
@@ -19,7 +23,7 @@ import {
 } from '../models/social';
 import { UserScopedApi, apiUrl } from './api-base';
 
-/** Friends, activity feed, Movie Night, sharing and notifications. All require sign-in. */
+/** Friends, feed, invites, Movie Night, sharing and notifications. All require sign-in except `inviter`. */
 @Injectable({ providedIn: 'root' })
 export class SocialApi extends UserScopedApi {
   private readonly http = inject(HttpClient);
@@ -67,6 +71,36 @@ export class SocialApi extends UserScopedApi {
     return this.http
       .get<FriendActivityResponse>(this.me('/friends/activity'))
       .pipe(map((r) => r.activities ?? []));
+  }
+
+  /** The friends feed; `before` = timestamp of the last item already shown (next page). */
+  feed(before?: number): Observable<FeedResponse> {
+    return this.http.get<FeedResponse>(this.me('/feed'), {
+      params: before ? { before } : {},
+    });
+  }
+
+  /** The user's own invite link (created on first use). */
+  myInvite(): Observable<MyInvite> {
+    return this.http.get<MyInvite>(this.me('/invite'));
+  }
+
+  /** A new invite link; the old one stops working. */
+  resetInvite(): Observable<MyInvite> {
+    return this.http.post<MyInvite>(this.me('/invite/reset'), {});
+  }
+
+  /** Who an invite link belongs to (works signed out). */
+  inviter(code: string): Observable<Inviter> {
+    return this.http.get<Inviter>(apiUrl(`/api/invite/${encodeURIComponent(code)}`));
+  }
+
+  /** Accepts an invite: the two users become friends right away. */
+  acceptInvite(code: string): Observable<InviteAccepted> {
+    return this.http.post<InviteAccepted>(
+      apiUrl(`/api/invite/${encodeURIComponent(code)}/accept`),
+      {},
+    );
   }
 
   movieNight(friendId: string, page = 1): Observable<MovieNightResponse> {

@@ -12,25 +12,28 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { SocialApi } from '../../core/api/social-api';
 import { FriendlyError, friendlyError } from '../../core/http/friendly-error';
-import { FriendActivity, PendingRequest, UserSearchResult } from '../../core/models/social';
+import { MyInvite, PendingRequest, SharedWish, UserSearchResult } from '../../core/models/social';
+import { LibraryStore } from '../../core/state/library.store';
+import { tmdbImage } from '../../core/util/image-url';
 import { SocialStore } from '../../core/state/social.store';
 import { PageTitle } from '../../core/util/page-title';
 import { ConfirmService } from '../../shared/ui/confirm-dialog';
-import { MovieListRow } from '../../shared/ui/movie-list-row';
 import { SnackbarService } from '../../shared/ui/snackbar';
 import { EmptyState, ErrorState, Spinner } from '../../shared/ui/states';
 import { UserAvatar } from '../../shared/ui/user-avatar';
+import { FeedCard } from './feed-card';
 
 const MIN_QUERY_LENGTH = 2;
 
 /**
- * Friends (FriendsScreen): incoming requests first (so typing in the search never pushes them away),
- * user search with an action per friendship status, sent requests, the friend list and the friends'
- * activity. Irreversible actions (reject, cancel, remove) ask for confirmation.
+ * Friends (FriendsScreen): incoming requests first, then the friends feed ("For you" - movies we
+ * both want to watch - and what friends watched, rated and commented), the invite link, user
+ * search with an action per friendship status, sent requests and the friend list. Irreversible
+ * actions (reject, cancel, remove, a new invite link) ask for confirmation.
  */
 @Component({
   selector: 'app-friends',
-  imports: [TranslocoPipe, RouterLink, UserAvatar, MovieListRow, ErrorState, EmptyState, Spinner],
+  imports: [TranslocoPipe, RouterLink, UserAvatar, FeedCard, ErrorState, EmptyState, Spinner],
   templateUrl: './friends.page.html',
   styleUrl: './friends.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,11 +45,15 @@ export class FriendsPage implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly social = inject(SocialStore);
+  private readonly library = inject(LibraryStore);
 
   protected readonly query = signal('');
   protected readonly results = signal<UserSearchResult[] | null>(null);
   protected readonly searching = signal(false);
   protected readonly searchError = signal<FriendlyError | null>(null);
+  /** The user's invite link; null until loaded (the card is hidden if it cannot be loaded). */
+  protected readonly invite = signal<MyInvite | null>(null);
+  protected readonly inviteBusy = signal(false);
   private readonly typed$ = new Subject<string>();
   private searchSub?: Subscription;
 
@@ -56,6 +63,12 @@ export class FriendsPage implements OnInit {
 
   ngOnInit(): void {
     this.social.load();
+    this.social.loadFeed();
+    // The feed shows "Add to watchlist" only for movies not on the user's lists yet.
+    this.library.ensureLoaded();
+    this.api
+      .myInvite()
+      .subscribe({ next: (invite) => this.invite.set(invite), error: () => undefined });
     this.typed$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((q) => this.search(q));
@@ -119,14 +132,67 @@ export class FriendsPage implements OnInit {
     return Math.round(value);
   }
 
-  protected activityText(activity: FriendActivity): string {
-    const rating = activity.metadata.rating;
-    return activity.action === 'rated' && rating
-      ? this.transloco.translate('profile_activity_row_rated', {
-          p1: activity.friend_name,
-          p2: rating,
+  /** "You and Ana want to watch" / "You, Ana and 2 more want to watch". */
+  protected wishText(wish: SharedWish): string {
+    const first = this.displayName(wish.friends[0]?.username);
+    return wish.friends.length > 1
+      ? this.transloco.translate('feed_shared_wish_more', {
+          p1: first,
+          p2: wish.friends.length - 1,
         })
-      : this.transloco.translate('profile_activity_row_watched', { p1: activity.friend_name });
+      : this.transloco.translate('feed_shared_wish', { p1: first });
+  }
+
+  protected wishPoster(wish: SharedWish): string | null {
+    return tmdbImage(wish.poster_path, 'w185');
+  }
+
+  protected async copyInvite(): Promise<void> {
+    const invite = this.invite();
+    if (!invite) return;
+    try {
+      await navigator.clipboard.writeText(invite.url);
+      this.snackbar.show(this.transloco.translate('invite_copied'));
+    } catch {
+      this.fail('web_share_failed');
+    }
+  }
+
+  /** The system share sheet where there is one (phones), otherwise copy. */
+  protected async shareInvite(): Promise<void> {
+    const invite = this.invite();
+    if (!invite) return;
+    if (!navigator.share) return this.copyInvite();
+    try {
+      await navigator.share({
+        text: this.transloco.translate('invite_share_text', { p1: invite.url }),
+        url: invite.url,
+      });
+    } catch (error) {
+      // AbortError = the user closed the share sheet.
+      if ((error as Error)?.name !== 'AbortError') this.fail('web_share_failed');
+    }
+  }
+
+  protected async resetInvite(): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: this.transloco.translate('invite_reset_confirm_title'),
+      message: this.transloco.translate('invite_reset_confirm_message'),
+      confirmLabel: this.transloco.translate('invite_reset'),
+      cancelLabel: this.transloco.translate('profile_remove_cancel'),
+    });
+    if (!confirmed) return;
+    this.inviteBusy.set(true);
+    this.api.resetInvite().subscribe({
+      next: (invite) => {
+        this.invite.set(invite);
+        this.inviteBusy.set(false);
+      },
+      error: () => {
+        this.inviteBusy.set(false);
+        this.fail('error_server');
+      },
+    });
   }
 
   private search(q: string): void {

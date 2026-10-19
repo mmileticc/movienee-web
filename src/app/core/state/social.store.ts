@@ -4,11 +4,13 @@ import { SocialApi } from '../api/social-api';
 import { SessionStore } from '../auth/session.store';
 import { FriendlyError, friendlyError } from '../http/friendly-error';
 import {
+  FeedItem,
   FriendActivity,
   FriendInfo,
   FriendshipStatus,
   NotificationItem,
   PendingRequest,
+  SharedWish,
   UserSearchResult,
 } from '../models/social';
 
@@ -36,6 +38,13 @@ export class SocialStore {
   readonly loading = signal(false);
   readonly error = signal<FriendlyError | null>(null);
 
+  /** The friends feed (null until the first page arrived) and what we both want to watch. */
+  readonly feed = signal<FeedItem[] | null>(null);
+  readonly sharedWishes = signal<SharedWish[]>([]);
+  readonly feedHasMore = signal(false);
+  readonly feedLoading = signal(false);
+  readonly feedError = signal<FriendlyError | null>(null);
+
   readonly notifications = signal<NotificationItem[] | null>(null);
   readonly unreadCount = computed(
     () => (this.notifications() ?? []).filter((n) => !n.isRead).length,
@@ -48,6 +57,7 @@ export class SocialStore {
 
   private owner: string | null = null;
   private loadSub?: Subscription;
+  private feedSub?: Subscription;
   private notificationsSub?: Subscription;
   private pollTimer?: ReturnType<typeof setInterval>;
 
@@ -80,6 +90,40 @@ export class SocialStore {
       error: (e) => {
         this.error.set(friendlyError(e, 'error_load_profile'));
         this.loading.set(false);
+      },
+    });
+  }
+
+  /** The first page of the feed (replaces what was shown). */
+  loadFeed(): void {
+    this.fetchFeed(undefined);
+  }
+
+  /** The next page, older than the last item shown. */
+  loadMoreFeed(): void {
+    const last = this.feed()?.at(-1);
+    if (!last || this.feedLoading() || !this.feedHasMore()) return;
+    this.fetchFeed(last.timestamp);
+  }
+
+  private fetchFeed(before: number | undefined): void {
+    if (!this.session.isSignedIn()) return;
+    this.feedSub?.unsubscribe();
+    this.feedLoading.set(true);
+    this.feedError.set(null);
+    this.feedSub = this.api.feed(before).subscribe({
+      next: (page) => {
+        // A comment and a rating can share a timestamp across pages; ids keep cards unique.
+        const known = new Set(before ? (this.feed() ?? []).map((i) => i.id) : []);
+        const fresh = page.items.filter((i) => !known.has(i.id));
+        this.feed.update((items) => (before ? [...(items ?? []), ...fresh] : fresh));
+        if (!before) this.sharedWishes.set(page.shared_wishes ?? []);
+        this.feedHasMore.set(page.has_more);
+        this.feedLoading.set(false);
+      },
+      error: (e) => {
+        this.feedError.set(friendlyError(e, 'error_load_profile'));
+        this.feedLoading.set(false);
       },
     });
   }
@@ -190,6 +234,12 @@ export class SocialStore {
     this.owner = userId;
     this.loadSub?.unsubscribe();
     this.notificationsSub?.unsubscribe();
+    this.feedSub?.unsubscribe();
+    this.feed.set(null);
+    this.sharedWishes.set([]);
+    this.feedHasMore.set(false);
+    this.feedLoading.set(false);
+    this.feedError.set(null);
     this.friends.set(null);
     this.incoming.set([]);
     this.sent.set([]);

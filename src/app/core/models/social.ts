@@ -141,3 +141,58 @@ export interface NotificationItem {
 export interface NotificationsResponse {
   notifications: NotificationItem[];
 }
+
+/** Who did something in the feed. */
+export interface FeedFriend {
+  id: string;
+  username?: string | null;
+  avatar_url?: string | null;
+}
+
+export type FeedItemType = 'rated' | 'watched' | 'commented';
+
+/** One feed card; `timestamp` is epoch ms. */
+export interface FeedItem {
+  id: string;
+  type: FeedItemType | string;
+  friend: FeedFriend;
+  tmdb_id: number;
+  movie_title: string;
+  poster_path?: string | null;
+  rating?: number | null;
+  text?: string | null;
+  timestamp: number;
+}
+
+/** A movie the user and these friends all want to watch (only movies on the user's own list). */
+export interface SharedWish {
+  tmdb_id: number;
+  movie_title: string;
+  poster_path?: string | null;
+  friends: FeedFriend[];
+  cinema_count: number;
+}
+
+export interface FeedResponse {
+  items: FeedItem[];
+  has_more: boolean;
+  shared_wishes?: SharedWish[];
+}
+
+/** The user's own invite link. */
+export interface MyInvite {
+  code: string;
+  url: string;
+}
+
+/** Who sent an invite link (public: name and avatar only). */
+export interface Inviter {
+  inviter_id: string;
+  username?: string | null;
+  avatar_url?: string | null;
+}
+
+export interface InviteAccepted {
+  friend_id: string;
+  already_friends: boolean;
+}

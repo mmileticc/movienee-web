@@ -75,6 +75,116 @@
   }
 }
 
+.sub-title {
+  margin: 0 0 var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// "For you": movies we both want to watch, side by side (scrolls sideways on phones).
+.wishes {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  margin: 0 0 var(--space-4);
+  padding: 0 0 var(--space-1);
+  list-style: none;
+  scrollbar-width: thin;
+
+  li {
+    flex: 0 0 min(280px, 80%);
+  }
+}
+
+.wish {
+  display: flex;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+
+  .poster {
+    flex: none;
+    width: 56px;
+    aspect-ratio: 2 / 3;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--surface-2);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  .wish-text {
+    display: grid;
+    align-content: center;
+    gap: 2px;
+    min-width: 0;
+  }
+  .wish-title {
+    font-weight: 700;
+  }
+  .in-cinemas {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8125rem;
+    color: var(--accent-text);
+    .icon {
+      font-size: 16px;
+    }
+  }
+  &:hover .wish-title {
+    color: var(--accent-text);
+  }
+}
+
+.feed {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.load-more {
+  display: flex;
+  margin: var(--space-4) auto 0;
+}
+
+.invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  border: 1px dashed var(--border);
+
+  .invite-icon {
+    font-size: 32px;
+    color: var(--accent-text);
+  }
+  .invite-text {
+    flex: 1 1 260px;
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+  .link {
+    margin-top: var(--space-1);
+    font-size: 0.8125rem;
+    color: var(--text-2);
+    overflow-wrap: anywhere;
+  }
+  .invite-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+}
+
 @media (max-width: 560px) {
   .person {
     flex-wrap: wrap;

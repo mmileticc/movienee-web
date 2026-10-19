@@ -65,6 +65,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
   },
   {
+    // Public: the page behind a shared invite link; signing in happens on the page itself.
+    path: 'invite/:code',
+    loadComponent: () => import('./features/invite/invite.page').then((m) => m.InvitePage),
+  },
+  {
     path: 'privacy',
     loadComponent: () => import('./features/privacy/privacy.page').then((m) => m.PrivacyPage),
   },

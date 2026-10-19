@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cinemasSubtitle } from '../../features/browse/browse-movie';
-import { formatDistance, formatRating, yearsBetween } from './format';
+import { formatDistance, formatRating, formatTimeAgo, yearsBetween } from './format';
 import { avatarUrl, releaseYear, tmdbImage } from './image-url';
 import { environment } from '../../../environments/environment';
 
@@ -14,6 +14,15 @@ describe('format helpers', () => {
 
   it('formats distances', () => {
     expect(formatDistance(1.234, 'sr')).toBe('1,2 km');
+  });
+
+  it('says how long ago something happened, then the date after a week', () => {
+    const now = Date.UTC(2026, 9, 15, 12, 0);
+    expect(formatTimeAgo(now - 20_000, 'en', now)).toBe('now');
+    expect(formatTimeAgo(now - 5 * 60_000, 'en', now)).toMatch(/^5 min\.? ago$/);
+    expect(formatTimeAgo(now - 3 * 3_600_000, 'en', now)).toMatch(/^3 hr\.? ago$/);
+    expect(formatTimeAgo(now - 86_400_000, 'en', now)).toBe('yesterday');
+    expect(formatTimeAgo(now - 10 * 86_400_000, 'en', now)).toMatch(/2026/);
   });
 
   it('counts whole years', () => {

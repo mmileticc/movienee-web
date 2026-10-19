@@ -35,6 +35,88 @@
   }
 
   <section class="section">
+    <h2 class="t-title-lg section-title">{{ 'feed_header' | transloco }}</h2>
+
+    @if (social.sharedWishes().length > 0) {
+      <h3 class="t-label t-secondary sub-title">{{ 'feed_for_you' | transloco }}</h3>
+      <ul class="wishes">
+        @for (wish of social.sharedWishes(); track wish.tmdb_id) {
+          <li>
+            <a class="wish" [routerLink]="['/movie', wish.tmdb_id]">
+              <span class="poster">
+                @if (wishPoster(wish); as src) {
+                  <img [src]="src" alt="" width="56" height="84" loading="lazy" />
+                }
+              </span>
+              <span class="wish-text">
+                <span class="t-small t-secondary">{{ wishText(wish) }}</span>
+                <span class="wish-title">{{ wish.movie_title }}</span>
+                @if (wish.cinema_count > 0) {
+                  <span class="in-cinemas">
+                    <span class="icon" aria-hidden="true">theaters</span>
+                    {{ 'feed_in_cinemas' | transloco: { p1: wish.cinema_count } }}
+                  </span>
+                }
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (social.feedError(); as e) {
+      <app-error-state [error]="e" (retry)="social.loadFeed()" />
+    } @else if (social.feed() === null) {
+      <app-spinner />
+    } @else if (social.feed()!.length === 0) {
+      <app-empty-state
+        icon="group"
+        [heading]="'feed_empty_title' | transloco"
+        [message]="'feed_empty_message' | transloco"
+      />
+    } @else {
+      <div class="feed">
+        @for (item of social.feed(); track item.id) {
+          <app-feed-card [item]="item" />
+        }
+      </div>
+      @if (social.feedHasMore()) {
+        <button
+          class="btn load-more"
+          type="button"
+          [disabled]="social.feedLoading()"
+          (click)="social.loadMoreFeed()"
+        >
+          {{ 'feed_load_more' | transloco }}
+        </button>
+      }
+    }
+  </section>
+
+  @if (invite(); as link) {
+    <section class="section invite">
+      <span class="icon invite-icon" aria-hidden="true">group_add</span>
+      <div class="invite-text">
+        <h2 class="t-title">{{ 'invite_title' | transloco }}</h2>
+        <p class="t-small t-secondary">{{ 'invite_message' | transloco }}</p>
+        <code class="link">{{ link.url }}</code>
+      </div>
+      <div class="invite-actions">
+        <button class="btn small primary" type="button" (click)="shareInvite()">
+          <span class="icon" aria-hidden="true">share</span>
+          {{ 'invite_share' | transloco }}
+        </button>
+        <button class="btn small" type="button" (click)="copyInvite()">
+          {{ 'invite_copy' | transloco }}
+        </button>
+        <button class="btn small" type="button" [disabled]="inviteBusy()" (click)="resetInvite()">
+          {{ 'invite_reset' | transloco }}
+        </button>
+      </div>
+    </section>
+  }
+
+  <section class="section">
     <label class="search">
       <span class="icon" aria-hidden="true">person_search</span>
       <input
@@ -173,21 +255,5 @@
         }
       </ul>
     </section>
-
-    @if (social.activity().length > 0) {
-      <section class="section">
-        <h2 class="t-title-lg section-title">{{ 'profile_friend_activity_header' | transloco }}</h2>
-        <div class="list-stack">
-          @for (activity of social.activity(); track activity.activity_id) {
-            <app-movie-list-row
-              [movieId]="activity.tmdb_id"
-              [title]="activity.movie_title"
-              [posterPath]="activity.poster_path"
-              [meta]="activityText(activity)"
-            />
-          }
-        </div>
-      </section>
-    }
   }
 </div>

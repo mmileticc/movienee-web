@@ -32,6 +32,31 @@ export function formatTimestamp(epochMs: number, lang: AppLanguage): string {
   }).format(new Date(epochMs));
 }
 
+/**
+ * "pre 5 min" / "5 min ago" up to a week, then the date; for the friends feed. [now] is injectable
+ * for tests.
+ */
+export function formatTimeAgo(
+  epochMs: number,
+  lang: AppLanguage,
+  now: number = Date.now(),
+): string {
+  const seconds = Math.round((epochMs - now) / 1000);
+  const steps: [Intl.RelativeTimeFormatUnit, number][] = [
+    ['minute', 60],
+    ['hour', 3600],
+    ['day', 86400],
+  ];
+  if (seconds > -60)
+    return new Intl.RelativeTimeFormat(LOCALES[lang], { numeric: 'auto' }).format(0, 'second');
+  if (seconds <= -7 * 86400) return formatTimestamp(epochMs, lang);
+  const [unit, size] = [...steps].reverse().find(([, s]) => -seconds >= s) ?? steps[0];
+  return new Intl.RelativeTimeFormat(LOCALES[lang], { numeric: 'auto', style: 'short' }).format(
+    Math.round(seconds / size),
+    unit,
+  );
+}
+
 /** "1,2 km" / "1.2 km". */
 export function formatDistance(km: number, lang: AppLanguage): string {
   return `${new Intl.NumberFormat(LOCALES[lang], { maximumFractionDigits: 1 }).format(km)} km`;
